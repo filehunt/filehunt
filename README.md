@@ -1,6 +1,6 @@
-# 📁 Filehub
+# 📁 Filehunt
 
-**Filehub** is a decentralized, Git-backed file collaboration platform designed for non-technical users (creatives, designers, business teams).
+**Filehunt** is a decentralized, Git-backed file collaboration platform designed for non-technical users (creatives, designers, business teams).
 It eliminates folder trees, embraces version timelines, and enables structured file sharing, comments, and reviews — all without exposing Git internals.
 
 ---
@@ -52,12 +52,12 @@ It eliminates folder trees, embraces version timelines, and enables structured f
 - `user-service`: user management, authentication, billing sync
 - `search-service`: search proxy interface
 - `api-gateway`: orchestrator and public API
-- `notification-worker`: background emails & push dispatch
 
 **Workers:**
 
 - `file-worker`: preview generation, transcoding, object storage I/O
 - `file-indexer`: search indexing
+- `notification-worker`: background emails & push dispatch
 
 **Storage:**
 
@@ -95,18 +95,19 @@ Rust and TypeScript services are coordinated using a polyglot monorepo setup.
 ## 📁 Project Structure
 
 ```
-filehub/
+filehunt/
 ├── apps/
-│   ├── web/                        # Next.js frontend
 │   ├── api-gateway/                # NestJS orchestrateur
+│   ├── desktop/                    # Dioxus desktop frontend
 │   ├── file-service/               # Rust - file metadata, presigned S3
 │   ├── git-service/                # Rust - Git backend
-│   ├── user-service/               # NestJS - Prisma, auth, billing, migrations/
 │   └── search-service/             # NestJS - OpenSearch
+│   ├── user-service/               # NestJS - Prisma, auth, billing, migrations/
+│   ├── web/                        # Next.js frontend
 │
 ├── workers/
-│   ├── file-worker/                # Rust - media processing
 │   ├── file-indexer/               # Rust - OpenSearch indexing
+│   ├── file-worker/                # Rust - media processing
 │   └── notification-worker/        # NestJS - SES & Push (SQS triggered)
 │
 ├── packages/

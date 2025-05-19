@@ -1,0 +1,19 @@
+{
+  "name": "filehunt",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "workers/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "packageManager": "npm@10.2.4",
+  "devDependencies": {
+    "turbo": "^2.5.3"
+  }
+}
