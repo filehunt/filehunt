@@ -1,0 +1,89 @@
+version: '3.8'
+services:
+  localstack:
+    image: localstack/localstack:3.8.1
+    container_name: localstack
+    ports:
+      - "4566:4566"
+      - "8081:8080"
+    environment:
+      - SERVICES=apigateway,ecs,s3,dynamodb,cloudwatch,ssm,rds  
+      - DEFAULT_REGION=eu-west-3  
+      - EAGER_SERVICE_LOADING=1
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - app-network
+    restart: on-failure
+
+  postgres:
+    image: postgres:16  
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=f1le4unT
+      - POSTGRES_DB=app_db  
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: on-failure
+
+  git-service:
+    image: ubuntu:22.04  
+    container_name: git-service
+    volumes:
+      - ../:/app
+    command: ["/app/target/release/git-service"]
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=eu-west-3
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - DATABASE_URL=postgres://admin:f1le4unT@postgres:5432/app_db  
+    depends_on:
+      - localstack
+      - postgres
+    networks:
+      - app-network
+    restart: on-failure
+
+  # Placeholder for other services
+  web:
+    image: node:18  # For Next.js
+    container_name: web
+    volumes:
+      - ../web:/app
+    command: ["npm", "run", "dev"]
+    ports:
+      - "3000:3000"
+    environment:
+      - API_GATEWAY_URL=http://localstack:4566/filehunt  
+    depends_on:
+      - localstack
+    networks:
+      - app-network
+
+  user-service:
+    image: ubuntu:22.04  
+    container_name: user-service
+    environment:
+      - DATABASE_URL=postgres://admin:admin123@postgres:5432/app_db
+      - AWS_DEFAULT_REGION=eu-west-3
+      - AWS_ENDPOINT_URL=http://localstack:4566
+    depends_on:
+      - postgres
+      - localstack
+    networks:
+      - app-network
+
+volumes:
+  localstack_data:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
