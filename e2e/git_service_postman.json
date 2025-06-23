@@ -1,0 +1,375 @@
+{
+	"info": {
+		"_postman_id": "git-service-api-collection",
+		"name": "Git Service API",
+		"description": "Collection complète pour tester l'API du git-service FileHunt",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					}
+				},
+				{
+					"name": "Readiness Check",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/ready",
+							"host": ["{{base_url}}"],
+							"path": ["ready"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Repository Management",
+			"item": [
+				{
+					"name": "Create Repository",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"test-repo\",\n  \"owner\": \"testuser\",\n  \"description\": \"Repository de test pour l'API\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/repositories",
+							"host": ["{{base_url}}"],
+							"path": ["repositories"]
+						}
+					}
+				},
+				{
+					"name": "List Repositories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories",
+							"host": ["{{base_url}}"],
+							"path": ["repositories"]
+						}
+					}
+				},
+				{
+					"name": "Get Repository",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Commit Operations",
+			"item": [
+				{
+					"name": "Create First Commit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Initial commit - Added main configuration file\",\n  \"author\": \"testuser@example.com\",\n  \"file_path\": \"/config/app.yaml\",\n  \"repository_id\": \"{{repository_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits"]
+						}
+					}
+				},
+				{
+					"name": "Create Second Commit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"feat: Added user authentication module\",\n  \"author\": \"testuser@example.com\",\n  \"file_path\": \"/src/auth.rs\",\n  \"repository_id\": \"{{repository_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits"]
+						}
+					}
+				},
+				{
+					"name": "List All Commits",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits"]
+						}
+					}
+				},
+				{
+					"name": "List Commits Paginated",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits?limit=1&offset=0",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Commit Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits/{{commit_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits", "{{commit_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Full Commit Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits/{{commit_id}}/details",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits", "{{commit_id}}", "details"]
+						}
+					}
+				},
+				{
+					"name": "Download Commit File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits/{{commit_id}}/file",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits", "{{commit_id}}", "file"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Production Scenarios",
+			"item": [
+				{
+					"name": "Create Production Repository",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"production-app\",\n  \"owner\": \"devops\",\n  \"description\": \"Repository principal de l'application\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/repositories",
+							"host": ["{{base_url}}"],
+							"path": ["repositories"]
+						}
+					}
+				},
+				{
+					"name": "Create Hotfix Commit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"hotfix: Fix critical security vulnerability\",\n  \"author\": \"security@company.com\",\n  \"file_path\": \"/src/security/auth.rs\",\n  \"repository_id\": \"devops_production-app\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/repositories/devops_production-app/commits",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "devops_production-app", "commits"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Error Handling",
+			"item": [
+				{
+					"name": "Error - Nonexistent Repository",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/nonexistent_repo",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "nonexistent_repo"]
+						}
+					}
+				},
+				{
+					"name": "Error - Nonexistent Commit",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/repositories/{{repository_id}}/commits/00000000-0000-0000-0000-000000000000",
+							"host": ["{{base_url}}"],
+							"path": ["repositories", "{{repository_id}}", "commits", "00000000-0000-0000-0000-000000000000"]
+						}
+					}
+				},
+				{
+					"name": "Error - Invalid Repository",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"owner\": \"\",\n  \"description\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/repositories",
+							"host": ["{{base_url}}"],
+							"path": ["repositories"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "repository_id",
+			"value": "testuser_test-repo",
+			"type": "string"
+		},
+		{
+			"key": "commit_id",
+			"value": "REPLACE_WITH_ACTUAL_COMMIT_ID",
+			"type": "string"
+		}
+	]
+}

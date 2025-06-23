@@ -1,0 +1,60 @@
+{
+  "environments": [
+    {
+      "name": "Local Development",
+      "slug": "local",
+      "variables": {
+        "base_url": "http://localhost:3000",
+        "s3_endpoint": "http://localhost:4566",
+        "environment": "development",
+        "timeout": "30",
+        "test_owner": "local-dev",
+        "test_email": "dev@localhost.local"
+      }
+    },
+    {
+      "name": "Docker Compose",
+      "slug": "docker",
+      "variables": {
+        "base_url": "http://git-service:3000",
+        "s3_endpoint": "http://localstack:4566",
+        "environment": "docker",
+        "timeout": "45",
+        "test_owner": "docker-test",
+        "test_email": "test@docker.local"
+      }
+    },
+    {
+      "name": "Staging",
+      "slug": "staging",
+      "variables": {
+        "base_url": "https://git-service-staging.filehunt.com",
+        "s3_endpoint": "",
+        "environment": "staging",
+        "timeout": "60",
+        "test_owner": "staging-test",
+        "test_email": "staging@filehunt.com"
+      }
+    },
+    {
+      "name": "Production",
+      "slug": "production",
+      "variables": {
+        "base_url": "https://git-service.filehunt.com",
+        "s3_endpoint": "",
+        "environment": "production",
+        "timeout": "60",
+        "test_owner": "prod-test",
+        "test_email": "prod-test@filehunt.com"
+      }
+    }
+  ],
+  "default_environment": "local",
+  "global_variables": {
+    "api_version": "v1",
+    "content_type": "application/json",
+    "user_agent": "FileHunt-E2E-Tests/1.0",
+    "retry_count": "3",
+    "retry_delay": "1000"
+  }
+}

@@ -1,0 +1,47 @@
+use axum::{
+    extract::{Path, State},
+    response::Json,
+    Json as JsonExtractor,
+};
+use crate::{
+    models::{CreateRepositoryRequest, RepositoryResponse, Result},
+    services::GitService,
+    state::AppState,
+};
+
+pub async fn create_repository(
+    State(state): State<AppState>,
+    JsonExtractor(request): JsonExtractor<CreateRepositoryRequest>,
+) -> Result<Json<RepositoryResponse>> {
+    let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
+    let git_service = GitService::new(s3_service);
+    let repository = git_service.create_repository(request).await?;
+    
+    let response = RepositoryResponse {
+        repository,
+        commit_count: 0,
+    };
+    
+    Ok(Json(response))
+}
+
+pub async fn get_repository(
+    State(state): State<AppState>,
+    Path(repository_id): Path<String>,
+) -> Result<Json<RepositoryResponse>> {
+    let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
+    let git_service = GitService::new(s3_service);
+    let response = git_service.get_repository_with_stats(&repository_id).await?;
+    
+    Ok(Json(response))
+}
+
+pub async fn list_repositories(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<crate::models::Repository>>> {
+    let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
+    let git_service = GitService::new(s3_service);
+    let repositories = git_service.list_repositories().await?;
+    
+    Ok(Json(repositories))
+}

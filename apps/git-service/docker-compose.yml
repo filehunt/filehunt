@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  localstack:
+    container_name: git-service-localstack
+    image: localstack/localstack:3.8
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/var/lib/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - FORCE_NONINTERACTIVE=true
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./tmp/localstack}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/info"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - git-service-network
+
+  s3-setup:
+    image: amazon/aws-cli:2.13.25
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        echo 'Waiting for LocalStack S3 to be ready...'
+        until aws --endpoint-url=http://localstack:4566 s3 ls 2>/dev/null; do
+          echo 'S3 not ready yet, waiting...'
+          sleep 3
+        done
+        echo 'Creating S3 bucket...'
+        aws --endpoint-url=http://localstack:4566 s3 mb s3://git-service-bucket || echo 'Bucket already exists'
+        echo 'Verifying bucket creation...'
+        aws --endpoint-url=http://localstack:4566 s3 ls s3://git-service-bucket
+        echo 'S3 setup complete!'
+    networks:
+      - git-service-network
+
+networks:
+  git-service-network:
+    driver: bridge

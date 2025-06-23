@@ -1,0 +1,193 @@
+{
+  "version": "1.0.0",
+  "title": "Git Service API Collection",
+  "description": "Collection complète pour tester l'API du git-service",
+  "requests": [
+    {
+      "name": "Health Check",
+      "description": "Vérifier le statut de santé du service",
+      "url": "http://localhost:3000/health",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Readiness Check",
+      "description": "Vérifier si le service est prêt",
+      "url": "http://localhost:3000/ready",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Create Repository",
+      "description": "Créer un nouveau repository",
+      "url": "http://localhost:3000/repositories",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "name": "test-repo",
+        "owner": "testuser",
+        "description": "Repository de test pour l'API"
+      }
+    },
+    {
+      "name": "List Repositories",
+      "description": "Lister tous les repositories",
+      "url": "http://localhost:3000/repositories",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Get Repository",
+      "description": "Obtenir les détails d'un repository",
+      "url": "http://localhost:3000/repositories/testuser_test-repo",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Create First Commit",
+      "description": "Créer le premier commit",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "message": "Initial commit - Added main configuration file",
+        "author": "testuser@example.com",
+        "file_path": "/config/app.yaml",
+        "repository_id": "testuser_test-repo"
+      }
+    },
+    {
+      "name": "Create Second Commit",
+      "description": "Créer un deuxième commit",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "message": "feat: Added user authentication module",
+        "author": "testuser@example.com",
+        "file_path": "/src/auth.rs",
+        "repository_id": "testuser_test-repo"
+      }
+    },
+    {
+      "name": "List All Commits",
+      "description": "Lister tous les commits",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "List Commits Paginated",
+      "description": "Lister les commits avec pagination",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits?limit=1&offset=0",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Get Commit Details",
+      "description": "Obtenir les détails d'un commit (modifier l'ID)",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits/REPLACE_WITH_COMMIT_ID",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Get Full Commit Details",
+      "description": "Obtenir les détails complets avec métadonnées",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits/REPLACE_WITH_COMMIT_ID/details",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Download Commit File",
+      "description": "Télécharger le fichier d'un commit",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits/REPLACE_WITH_COMMIT_ID/file",
+      "method": "GET",
+      "headers": {
+        "Accept": "*/*"
+      }
+    },
+    {
+      "name": "Create Production Repository",
+      "description": "Créer un repository de production",
+      "url": "http://localhost:3000/repositories",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "name": "production-app",
+        "owner": "devops",
+        "description": "Repository principal de l'application"
+      }
+    },
+    {
+      "name": "Create Hotfix Commit",
+      "description": "Créer un commit de correction urgente",
+      "url": "http://localhost:3000/repositories/devops_production-app/commits",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "message": "hotfix: Fix critical security vulnerability",
+        "author": "security@company.com",
+        "file_path": "/src/security/auth.rs",
+        "repository_id": "devops_production-app"
+      }
+    },
+    {
+      "name": "Error - Nonexistent Repository",
+      "description": "Test erreur pour repository inexistant",
+      "url": "http://localhost:3000/repositories/nonexistent_repo",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Error - Nonexistent Commit",
+      "description": "Test erreur pour commit inexistant",
+      "url": "http://localhost:3000/repositories/testuser_test-repo/commits/00000000-0000-0000-0000-000000000000",
+      "method": "GET",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "name": "Error - Invalid Repository",
+      "description": "Test validation avec données invalides",
+      "url": "http://localhost:3000/repositories",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "name": "",
+        "owner": "",
+        "description": null
+      }
+    }
+  ]
+}
