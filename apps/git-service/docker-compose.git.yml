@@ -1,6 +1,28 @@
 version: '3.8'
 
 services:
+  # git-service:
+  #   build: .
+  #   container_name: filehunt-git-service
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - SERVER_PORT=3000
+  #     - S3_BUCKET=git-service-bucket
+  #     - S3_REGION=us-east-1
+  #     - S3_ENDPOINT=http://localstack:4566
+  #     - AWS_ACCESS_KEY_ID=test
+  #     - AWS_SECRET_ACCESS_KEY=test
+  #     - LOG_LEVEL=info
+  #   volumes:
+  #     - git_repositories:/var/git-repositories
+  #     - ./tmp/logs:/var/log/git-service
+  #   depends_on:
+  #     localstack:
+  #       condition: service_healthy
+  #   networks:
+  #     - git-service-network
+
   localstack:
     container_name: git-service-localstack
     image: localstack/localstack:3.8
@@ -19,7 +41,7 @@ services:
       - "${LOCALSTACK_VOLUME_DIR:-./tmp/localstack}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/info"]
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -52,6 +74,14 @@ services:
         echo 'S3 setup complete!'
     networks:
       - git-service-network
+
+volumes:
+  git_repositories:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/git-repositories
 
 networks:
   git-service-network:

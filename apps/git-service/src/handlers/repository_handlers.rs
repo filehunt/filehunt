@@ -20,6 +20,15 @@ pub async fn create_repository(
     let response = RepositoryResponse {
         repository,
         commit_count: 0,
+        branches: vec!["main".to_string()],
+        head_commit: None,
+        status: crate::models::RepositoryStatus {
+            is_initialized: true,
+            has_commits: false,
+            is_syncing: false,
+            sync_status: crate::models::SyncStatus::Pending,
+            pending_files: 0,
+        },
     };
     
     Ok(Json(response))

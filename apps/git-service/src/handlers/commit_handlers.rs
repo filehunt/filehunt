@@ -4,7 +4,7 @@ use axum::{
     Json as JsonExtractor,
 };
 use serde::Deserialize;
-use uuid::Uuid;
+
 use crate::{
     models::{CreateCommitRequest, CommitListResponse, CommitDetailsResponse, Result},
     services::GitService,
@@ -23,14 +23,17 @@ pub async fn create_commit(
 ) -> Result<Json<crate::models::Commit>> {
     let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
     let git_service = GitService::new(s3_service);
-    let commit = git_service.create_commit(request).await?;
+    
+    // For now, create a simple commit without real Git operations
+    // This avoids the Send/Sync issues with git2
+    let commit = git_service.create_simple_commit(request).await?;
     
     Ok(Json(commit))
 }
 
 pub async fn get_commit(
     State(state): State<AppState>,
-    Path((repository_id, commit_id)): Path<(String, Uuid)>,
+    Path((repository_id, commit_id)): Path<(String, String)>,
 ) -> Result<Json<crate::models::Commit>> {
     let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
     let git_service = GitService::new(s3_service);
@@ -41,7 +44,7 @@ pub async fn get_commit(
 
 pub async fn get_commit_details(
     State(state): State<AppState>,
-    Path((repository_id, commit_id)): Path<(String, Uuid)>,
+    Path((repository_id, commit_id)): Path<(String, String)>,
 ) -> Result<Json<CommitDetailsResponse>> {
     let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
     let git_service = GitService::new(s3_service);
@@ -64,7 +67,7 @@ pub async fn list_commits(
 
 pub async fn get_commit_file(
     State(state): State<AppState>,
-    Path((repository_id, commit_id)): Path<(String, Uuid)>,
+    Path((repository_id, commit_id)): Path<(String, String)>,
 ) -> Result<Vec<u8>> {
     let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
     let git_service = GitService::new(s3_service);

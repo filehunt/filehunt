@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use chrono::Utc;
-use uuid::Uuid;
+use base64::Engine as _;
 
 use crate::models::{
     Commit, CommitMetadata, Repository, CreateCommitRequest, CreateRepositoryRequest,
@@ -56,45 +56,85 @@ impl GitService {
         Ok(RepositoryResponse {
             repository,
             commit_count: commits.commits.len(),
+            branches: vec!["main".to_string()],
+            head_commit: None,
+            status: crate::models::RepositoryStatus {
+                is_initialized: true,
+                has_commits: commits.commits.len() > 0,
+                is_syncing: false,
+                sync_status: crate::models::SyncStatus::Synced,
+                pending_files: 0,
+            },
         })
     }
 
-    // Commit operations
-    pub async fn create_commit(&self, request: CreateCommitRequest) -> Result<Commit> {
+    // Commit operations with realistic Git SHA generation
+    pub async fn create_simple_commit(&self, request: CreateCommitRequest) -> Result<Commit> {
         // Validate repository exists
         let mut repository = self.get_repository(&request.repository_id).await?;
 
-        // TODO: call file-service here to get file content and verify file exists
-        // For now, we'll simulate getting file content
-        let file_content = self.get_file_content_from_file_service(&request.file_path).await?;
+        // Process files and create commit files
+        let mut commit_files = Vec::new();
+        for file_req in &request.files {
+            // Decode base64 content
+            let content = base64::engine::general_purpose::STANDARD
+                .decode(&file_req.content)
+                .map_err(|e| GitServiceError::BadRequest(format!("Invalid base64 content: {}", e)))?;
+            
+            let file_hash = self.s3_service.calculate_file_hash(&content);
+            let commit_file = crate::models::CommitFile::new(
+                file_req.path.clone(),
+                file_hash.clone(),
+                content.len() as u64,
+                file_req.mode.clone().unwrap_or_default(),
+            );
+
+            // Store file content
+            let file_key = format!("repositories/{}/files/{}", 
+                request.repository_id, file_hash);
+            self.s3_service.put_object(&file_key, Bytes::from(content)).await?;
+            
+            commit_files.push(commit_file);
+        }
         
-        // Calculate file hash
-        let file_hash = self.s3_service.calculate_file_hash(&file_content);
-
         // Get parent commit (latest commit in repository)
-        let parent_commit_id = repository.latest_commit_id;
+        let parent_commit_ids = if let Some(parent) = &repository.latest_commit_sha {
+            vec![parent.clone()]
+        } else {
+            vec![]
+        };
 
-        // Create new commit
-        let commit = Commit::new(
-            request.message,
-            request.author,
-            request.file_path.clone(),
-            file_hash,
-            request.repository_id.clone(),
-            parent_commit_id,
+        // Generate realistic Git SHA based on commit content
+        let commit_sha = self.generate_commit_sha(
+            &request.message,
+            &request.author,
+            &request.email,
+            &commit_files,
+            &parent_commit_ids
         );
 
-        // Store file in versioned location
-        self.s3_service.put_object(
-            &commit.file_storage_key(),
-            Bytes::from(file_content)
-        ).await?;
+        // Generate tree SHA
+        let tree_sha = self.generate_tree_sha(&commit_files);
+
+        // Create new commit with realistic SHA
+        let commit = Commit::new(
+            commit_sha,
+            request.message,
+            request.author,
+            request.email,
+            commit_files,
+            request.repository_id.clone(),
+            parent_commit_ids,
+            tree_sha,
+        );
 
         // Create commit metadata
         let metadata = CommitMetadata {
             commit: commit.clone(),
             created_at: commit.timestamp,
-            storage_path: commit.file_storage_key(),
+            local_path: format!("/var/git-repositories/{}", request.repository_id),
+            s3_synced: true,
+            sync_timestamp: Some(Utc::now()),
         };
 
         // Store commit metadata
@@ -105,7 +145,7 @@ impl GitService {
         ).await?;
 
         // Update repository with latest commit
-        repository.latest_commit_id = Some(commit.id);
+        repository.latest_commit_sha = Some(commit.id.clone());
         repository.updated_at = Utc::now();
         let repo_json = serde_json::to_string(&repository)?;
         self.s3_service.put_object(
@@ -116,7 +156,12 @@ impl GitService {
         Ok(commit)
     }
 
-    pub async fn get_commit(&self, repository_id: &str, commit_id: Uuid) -> Result<Commit> {
+    // Keep the original method for backwards compatibility
+    pub async fn create_commit(&self, request: CreateCommitRequest) -> Result<Commit> {
+        self.create_simple_commit(request).await
+    }
+
+    pub async fn get_commit(&self, repository_id: &str, commit_id: String) -> Result<Commit> {
         let metadata_key = format!("repositories/{}/commits/{}/meta.json", repository_id, commit_id);
         
         if !self.s3_service.object_exists(&metadata_key).await? {
@@ -129,7 +174,7 @@ impl GitService {
         Ok(metadata.commit)
     }
 
-    pub async fn get_commit_details(&self, repository_id: &str, commit_id: Uuid) -> Result<CommitDetailsResponse> {
+    pub async fn get_commit_details(&self, repository_id: &str, commit_id: String) -> Result<CommitDetailsResponse> {
         let metadata_key = format!("repositories/{}/commits/{}/meta.json", repository_id, commit_id);
         
         if !self.s3_service.object_exists(&metadata_key).await? {
@@ -142,6 +187,7 @@ impl GitService {
         Ok(CommitDetailsResponse {
             commit: metadata.commit.clone(),
             metadata,
+            diff: None,
         })
     }
 
@@ -192,12 +238,17 @@ impl GitService {
         Ok(CommitListResponse {
             commits: paginated_commits,
             total,
+            repository_head: None,
         })
     }
 
-    pub async fn get_commit_file_content(&self, repository_id: &str, commit_id: Uuid) -> Result<Bytes> {
+    pub async fn get_commit_file_content(&self, repository_id: &str, commit_id: String) -> Result<Bytes> {
         let commit = self.get_commit(repository_id, commit_id).await?;
-        let file_key = commit.file_storage_key();
+        let file_key = if !commit.files.is_empty() {
+            format!("{}/{}", commit.storage_key(), commit.files[0].path)
+        } else {
+            commit.storage_key()
+        };
         
         if !self.s3_service.object_exists(&file_key).await? {
             return Err(GitServiceError::FileNotFound(file_key));
@@ -206,14 +257,49 @@ impl GitService {
         self.s3_service.get_object(&file_key).await
     }
 
-    // Private helper methods
-    async fn get_file_content_from_file_service(&self, file_path: &str) -> Result<Vec<u8>> {
-        // TODO: call file-service here to get actual file content
-        // For now, return a placeholder implementation
-        tracing::warn!("TODO: Implement file-service integration for file: {}", file_path);
+    // Private helper methods for realistic SHA generation
+    fn generate_commit_sha(
+        &self,
+        message: &str,
+        author: &str,
+        email: &str,
+        files: &[crate::models::CommitFile],
+        parent_ids: &[String]
+    ) -> String {
+        use sha1::{Digest, Sha1};
         
-        // Simulate file content for development
-        Ok(format!("File content for: {}", file_path).into_bytes())
+        let mut hasher = Sha1::new();
+        
+        // Hash commit content in Git-like format
+        hasher.update(format!("commit {}\0", message.len() + author.len() + email.len()));
+        hasher.update(format!("tree {}\n", self.generate_tree_sha(files)));
+        
+        for parent in parent_ids {
+            hasher.update(format!("parent {}\n", parent));
+        }
+        
+        hasher.update(format!("author {} <{}> {}\n", author, email, chrono::Utc::now().timestamp()));
+        hasher.update(format!("committer {} <{}> {}\n", author, email, chrono::Utc::now().timestamp()));
+        hasher.update("\n");
+        hasher.update(message);
+        
+        hex::encode(hasher.finalize())
+    }
+
+    fn generate_tree_sha(&self, files: &[crate::models::CommitFile]) -> String {
+        use sha1::{Digest, Sha1};
+        
+        let mut hasher = Sha1::new();
+        
+        // Sort files by path for consistent tree SHA
+        let mut sorted_files: Vec<_> = files.iter().collect();
+        sorted_files.sort_by(|a, b| a.path.cmp(&b.path));
+        
+        for file in sorted_files {
+            hasher.update(format!("blob {}\0{}\n", file.size, file.content_hash));
+        }
+        
+        hex::encode(hasher.finalize())
     }
 
     // Health check methods
