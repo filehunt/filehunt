@@ -6,7 +6,7 @@ use crate::models::{
     Commit, CommitMetadata, Repository, CreateCommitRequest, CreateRepositoryRequest,
     CommitListResponse, CommitDetailsResponse, RepositoryResponse, GitServiceError, Result
 };
-use crate::services::s3_service::S3Service;
+use shared_rust::s3::S3Service;
 
 pub struct GitService {
     s3_service: S3Service,
@@ -254,7 +254,7 @@ impl GitService {
             return Err(GitServiceError::FileNotFound(file_key));
         }
 
-        self.s3_service.get_object(&file_key).await
+        self.s3_service.get_object(&file_key).await.map_err(|e| e.into())
     }
 
     // Private helper methods for realistic SHA generation

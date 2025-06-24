@@ -15,7 +15,7 @@ use crate::models::{
     CreateCommitRequest, CreateCommitFile, FileUploadRequest,
     GitServiceError, Result
 };
-use crate::services::S3Service;
+use shared_rust::s3::S3Service;
 
 pub struct GitRepositoryService {
     local_repo_path: PathBuf,

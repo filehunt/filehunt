@@ -2,7 +2,15 @@ use aws_sdk_s3::{primitives::ByteStream, Client as S3Client};
 use bytes::Bytes;
 use sha2::{Digest, Sha256};
 
-use crate::models::{GitServiceError, Result};
+use super::config::S3Config;
+
+pub type Result<T> = std::result::Result<T, S3Error>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum S3Error {
+    #[error("S3 operation failed: {0}")]
+    S3Error(String),
+}
 
 #[derive(Clone)]
 pub struct S3Service {
@@ -13,6 +21,34 @@ pub struct S3Service {
 impl S3Service {
     pub fn new(client: S3Client, bucket: String) -> Self {
         Self { client, bucket }
+    }
+
+    pub async fn from_config(config: &S3Config) -> Result<Self> {
+        use aws_credential_types::Credentials;
+        use aws_types::region::Region;
+        
+        let credentials = Credentials::new(
+            &config.access_key_id,
+            &config.secret_access_key,
+            None,
+            None,
+            "shared-rust-s3",
+        );
+
+        let mut config_builder = aws_sdk_s3::Config::builder()
+            .region(Region::new(config.region.clone()))
+            .credentials_provider(credentials)
+            .behavior_version_latest()
+            .force_path_style(config.endpoint.is_some());
+
+        if let Some(endpoint) = &config.endpoint {
+            config_builder = config_builder.endpoint_url(endpoint);
+        }
+
+        let s3_config = config_builder.build();
+        let client = S3Client::from_conf(s3_config);
+        
+        Ok(Self::new(client, config.bucket.clone()))
     }
 
     pub async fn put_object(&self, key: &str, data: Bytes) -> Result<String> {
@@ -26,7 +62,7 @@ impl S3Service {
             .send()
             .await
             .map_err(|e| {
-                GitServiceError::S3Error(format!("Failed to put object {}: {}", key, e))
+                S3Error::S3Error(format!("Failed to put object {}: {}", key, e))
             })?;
 
         // Calculate hash for verification
@@ -46,7 +82,7 @@ impl S3Service {
             .send()
             .await
             .map_err(|e| {
-                GitServiceError::S3Error(format!("Failed to get object {}: {}", key, e))
+                S3Error::S3Error(format!("Failed to get object {}: {}", key, e))
             })?;
 
         let data = response
@@ -54,7 +90,7 @@ impl S3Service {
             .collect()
             .await
             .map_err(|e| {
-                GitServiceError::S3Error(format!("Failed to read object body {}: {}", key, e))
+                S3Error::S3Error(format!("Failed to read object body {}: {}", key, e))
             })?
             .into_bytes();
 
@@ -80,11 +116,11 @@ impl S3Service {
                     || error_str.contains("404")
                     || error_str.contains("not found")
                     || error_str.contains("no such key") {
-                    tracing::debug!("Object {} not found: {}", key, e);
+                    log::debug!("Object {} not found: {}", key, e);
                     Ok(false)
                 } else {
                     // For LocalStack compatibility, log error but don't fail
-                    tracing::warn!("S3 error checking object existence {}: {}", key, e);
+                    log::warn!("S3 error checking object existence {}: {}", key, e);
                     // Default to false for LocalStack compatibility
                     Ok(false)
                 }
@@ -101,7 +137,7 @@ impl S3Service {
             .send()
             .await
             .map_err(|e| {
-                GitServiceError::S3Error(format!(
+                S3Error::S3Error(format!(
                     "Failed to list objects with prefix {}: {}",
                     prefix, e
                 ))
@@ -125,7 +161,7 @@ impl S3Service {
             .send()
             .await
             .map_err(|e| {
-                GitServiceError::S3Error(format!("Failed to delete object {}: {}", key, e))
+                S3Error::S3Error(format!("Failed to delete object {}: {}", key, e))
             })?;
 
         Ok(())
@@ -142,7 +178,7 @@ impl S3Service {
             .send()
             .await
             .map_err(|e| {
-                GitServiceError::S3Error(format!(
+                S3Error::S3Error(format!(
                     "Failed to copy object {} to {}: {}",
                     source_key, dest_key, e
                 ))

@@ -22,7 +22,8 @@ pub struct HealthResponse {
 pub async fn health_check(
     State(state): State<AppState>,
 ) -> Result<Json<HealthResponse>> {
-    let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
+    let s3_config = shared_rust::s3::S3Config::from_env("git-service");
+    let s3_service = shared_rust::s3::S3Service::from_config(&s3_config).await?;
     let git_service = GitService::new(s3_service);
     
     let s3_connection = match git_service.health_check().await {
@@ -50,7 +51,8 @@ pub async fn health_check(
 pub async fn readiness_check(
     State(state): State<AppState>,
 ) -> std::result::Result<StatusCode, StatusCode> {
-    let s3_service = crate::services::S3Service::new(state.s3_client, state.config.s3_bucket.clone());
+    let s3_config = shared_rust::s3::S3Config::from_env("git-service");
+    let s3_service = shared_rust::s3::S3Service::from_config(&s3_config).await.map_err(|_| StatusCode::SERVICE_UNAVAILABLE)?;
     let git_service = GitService::new(s3_service);
     
     match git_service.health_check().await {

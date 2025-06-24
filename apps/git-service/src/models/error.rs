@@ -95,15 +95,17 @@ impl From<serde_json::Error> for GitServiceError {
     }
 }
 
-impl From<aws_sdk_s3::Error> for GitServiceError {
-    fn from(err: aws_sdk_s3::Error) -> Self {
-        GitServiceError::S3Error(err.to_string())
-    }
-}
+
 
 impl From<anyhow::Error> for GitServiceError {
     fn from(err: anyhow::Error) -> Self {
         GitServiceError::InternalError(err.to_string())
+    }
+}
+
+impl From<shared_rust::s3::S3Error> for GitServiceError {
+    fn from(err: shared_rust::s3::S3Error) -> Self {
+        GitServiceError::S3Error(err.to_string())
     }
 }
 

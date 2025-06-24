@@ -154,3 +154,16 @@ target/
 #.idea/
 
 .turbo
+
+
+# LocalStack
+.localstack/
+localstack_main.log
+localstack-pro.log
+*.localstack.log
+docker-compose.override.yml
+.env.localstack
+.localstack.env
+volumes/
+tmp/
+.tmp/
