@@ -13,7 +13,7 @@ pub async fn create_repository(
     State(state): State<AppState>,
     JsonExtractor(request): JsonExtractor<CreateRepositoryRequest>,
 ) -> Result<Json<RepositoryResponse>> {
-    let s3_config = shared_rust::s3::S3Config::from_env("git-service");
+    let s3_config = shared_rust::s3::S3Config::from_env();
     let s3_service = shared_rust::s3::S3Service::from_config(&s3_config).await?;
     let git_service = GitService::new(s3_service);
     let repository = git_service.create_repository(request).await?;
@@ -39,7 +39,7 @@ pub async fn get_repository(
     State(state): State<AppState>,
     Path(repository_id): Path<String>,
 ) -> Result<Json<RepositoryResponse>> {
-    let s3_config = shared_rust::s3::S3Config::from_env("git-service");
+    let s3_config = shared_rust::s3::S3Config::from_env();
     let s3_service = shared_rust::s3::S3Service::from_config(&s3_config).await?;
     let git_service = GitService::new(s3_service);
     let response = git_service.get_repository_with_stats(&repository_id).await?;
@@ -50,7 +50,7 @@ pub async fn get_repository(
 pub async fn list_repositories(
     State(state): State<AppState>,
 ) -> Result<Json<Vec<crate::models::Repository>>> {
-    let s3_config = shared_rust::s3::S3Config::from_env("git-service");
+    let s3_config = shared_rust::s3::S3Config::from_env();
     let s3_service = shared_rust::s3::S3Service::from_config(&s3_config).await?;
     let git_service = GitService::new(s3_service);
     let repositories = git_service.list_repositories().await?;

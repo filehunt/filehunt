@@ -15,7 +15,7 @@ use crate::models::{
     CreateCommitRequest, CreateCommitFile, FileUploadRequest,
     GitServiceError, Result
 };
-use shared_rust::s3::S3Service;
+use shared_rust::s3::{S3Service, config::S3BucketType};
 
 pub struct GitRepositoryService {
     local_repo_path: PathBuf,
@@ -65,7 +65,7 @@ impl GitRepositoryService {
             tracing::info!("Opened existing Git repository at: {:?}", self.local_repo_path);
         } else {
             // Try to restore from S3 first
-            if self.s3_service.object_exists(&self.git_archive_key()).await? {
+            if self.s3_service.object_exists(S3BucketType::GitRepositories, &self.git_archive_key()).await? {
                 self.restore_from_s3().await?;
                 let repo = GitRepo::open(&self.local_repo_path)
                     .map_err(|e| GitServiceError::InternalError(format!("Failed to open restored repo: {}", e)))?;
@@ -300,6 +300,7 @@ impl GitRepositoryService {
             .map_err(|e| GitServiceError::InternalError(format!("Failed to read archive: {}", e)))?;
         
         self.s3_service.put_object(
+            S3BucketType::GitRepositories,
             &self.git_archive_key(),
             bytes::Bytes::from(archive_content)
         ).await?;
@@ -313,7 +314,7 @@ impl GitRepositoryService {
 
     pub async fn restore_from_s3(&self) -> Result<()> {
         // Download archive from S3
-        let archive_content = self.s3_service.get_object(&self.git_archive_key()).await?;
+        let archive_content = self.s3_service.get_object(S3BucketType::GitRepositories, &self.git_archive_key()).await?;
         
         // Extract archive
         let archive_path = format!("/tmp/{}_restore.tar.gz", self.repository_id);
@@ -434,6 +435,7 @@ impl GitRepositoryService {
         let metadata_key = format!("repositories/{}/commits/{}/meta.json", self.repository_id, commit.id);
         
         self.s3_service.put_object(
+            S3BucketType::GitRepositories,
             &metadata_key,
             bytes::Bytes::from(metadata_json)
         ).await?;

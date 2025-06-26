@@ -1,33 +1,51 @@
 services:
-  # git-service:
-  #   build: .
-  #   container_name: filehunt-git-service
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - SERVER_PORT=3000
-  #     - S3_BUCKET=git-service-bucket
-  #     - S3_REGION=us-east-1
-  #     - S3_ENDPOINT=http://localstack:4566
-  #     - AWS_ACCESS_KEY_ID=test
-  #     - AWS_SECRET_ACCESS_KEY=test
-  #     - LOG_LEVEL=info
-  #   volumes:
-  #     - git_repositories:/var/git-repositories
-  #     - ./tmp/logs:/var/log/git-service
-  #   depends_on:
-  #     localstack:
-  #       condition: service_healthy
-  #   networks:
-  #     - git-service-network
+  # PostgreSQL for file metadata
+  postgres:
+    container_name: filehunt-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: filehunt
+      POSTGRES_USER: filehunt
+      POSTGRES_PASSWORD: filehunt_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U filehunt -d filehunt"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - filehunt-network
 
+  # Redis for caching
+  redis:
+    container_name: filehunt-redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - filehunt-network
+
+  # LocalStack for AWS services simulation
   localstack:
     container_name: filehunt-localstack
     image: localstack/localstack:3.8
     ports:
       - "4566:4566"
+      - "4510-4559:4510-4559"
     environment:
-      - SERVICES=s3
+      - SERVICES=s3,sqs,sns,kms,iam
       - DEBUG=1
       - DATA_DIR=/var/lib/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
@@ -35,6 +53,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
       - FORCE_NONINTERACTIVE=true
+      - SKIP_INFRA_DOWNLOADS=1
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./tmp/localstack}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -47,7 +66,8 @@ services:
     networks:
       - filehunt-network
 
-  s3-setup:
+  # AWS services setup
+  aws-setup:
     image: amazon/aws-cli:2.13.25
     depends_on:
       localstack:
@@ -60,21 +80,118 @@ services:
     command:
       - -c
       - |
-        echo 'Waiting for LocalStack S3 to be ready...'
+        echo 'Waiting for LocalStack to be ready...'
         until aws --endpoint-url=http://localstack:4566 s3 ls 2>/dev/null; do
-          echo 'S3 not ready yet, waiting...'
+          echo 'LocalStack not ready yet, waiting...'
           sleep 3
         done
-        echo 'Creating S3 buckets for filehunt services...'
-        aws --endpoint-url=http://localstack:4566 s3 mb s3://filehunt-git-service || echo 'Git service bucket already exists'
+        
+        echo 'Creating S3 buckets...'
+        aws --endpoint-url=http://localstack:4566 s3 mb s3://filehunt-git || echo 'Git service bucket already exists'
+        aws --endpoint-url=http://localstack:4566 s3 mb s3://filehunt-files || echo 'File service bucket already exists'
         aws --endpoint-url=http://localstack:4566 s3 mb s3://filehunt-shared || echo 'Shared bucket already exists'
-        echo 'Verifying bucket creation...'
+        aws --endpoint-url=http://localstack:4566 s3 mb s3://filehunt-processing || echo 'Processing bucket already exists'
+        
+        echo 'Creating KMS key...'
+        aws --endpoint-url=http://localstack:4566 kms create-key \
+          --description "FilehuntFileEncryptionKey" \
+          --usage ENCRYPT_DECRYPT || echo 'KMS key creation failed or already exists'
+        
+        echo 'Creating SNS topics...'
+        aws --endpoint-url=http://localstack:4566 sns create-topic \
+          --name filehunt-file-events || echo 'File events topic already exists'
+        
+        echo 'Creating SQS queues...'
+        aws --endpoint-url=http://localstack:4566 sqs create-queue \
+          --queue-name file-processing-queue.fifo \
+          --attributes FifoQueue=true,ContentBasedDeduplication=false || echo 'File processing queue already exists'
+        
+        aws --endpoint-url=http://localstack:4566 sqs create-queue \
+          --queue-name notifications-queue.fifo \
+          --attributes FifoQueue=true,ContentBasedDeduplication=false || echo 'Notifications queue already exists'
+        
+        echo 'Verifying setup...'
         aws --endpoint-url=http://localstack:4566 s3 ls
-        echo 'S3 setup complete!'
+        aws --endpoint-url=http://localstack:4566 sqs list-queues
+        echo 'AWS setup complete!'
+    networks:
+      - filehunt-network
+
+  # File Service
+  file-service:
+    build: 
+      context: .
+      dockerfile: apps/file-service/Dockerfile
+    container_name: filehunt-file-service
+    ports:
+      - "3001:3001"
+    environment:
+      - SERVER_PORT=3001
+      - DATABASE_URL=postgresql://filehunt:filehunt_password@postgres:5432/filehunt
+      - REDIS_URL=redis://redis:6379
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_ENDPOINT=http://localstack:4566
+      - S3_FILE_BUCKET=filehunt-files
+      - S3_GIT_BUCKET=filehunt-git
+      - S3_SHARED_BUCKET=filehunt-shared
+      - S3_PROCESSING_BUCKET=filehunt-processing
+      - S3_PRESIGNED_URL_EXPIRY=3600
+      - S3_KMS_KEY_ID=alias/filehunt-file-encryption
+      - SNS_ENDPOINT=http://localstack:4566
+      - SNS_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:filehunt-file-events
+      - SQS_ENDPOINT=http://localstack:4566
+      - GIT_SERVICE_URL=http://git-service:3000
+      - MAX_FILE_SIZE=104857600
+      - ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,text/plain,application/pdf,video/mp4,audio/mpeg,application/json,text/markdown
+      - LOG_LEVEL=info
+    volumes:
+      - ./tmp/logs:/var/log/file-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      aws-setup:
+        condition: service_completed_successfully
+    networks:
+      - filehunt-network
+
+  # Git Service (uncommented and updated)
+  git-service:
+    build: 
+      context: .
+      dockerfile: apps/git-service/Dockerfile
+    container_name: filehunt-git-service
+    ports:
+      - "3000:3000"
+    environment:
+      - SERVER_PORT=3000
+      - S3_BUCKET=filehunt-git
+      - S3_REGION=us-east-1
+      - S3_ENDPOINT=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - LOG_LEVEL=info
+    volumes:
+      - git_repositories:/var/git-repositories
+      - ./tmp/logs:/var/log/git-service
+    depends_on:
+      localstack:
+        condition: service_healthy
+      aws-setup:
+        condition: service_completed_successfully
     networks:
       - filehunt-network
 
 volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
   git_repositories:
     driver: local
     driver_opts:

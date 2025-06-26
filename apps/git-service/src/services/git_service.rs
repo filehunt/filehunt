@@ -6,7 +6,7 @@ use crate::models::{
     Commit, CommitMetadata, Repository, CreateCommitRequest, CreateRepositoryRequest,
     CommitListResponse, CommitDetailsResponse, RepositoryResponse, GitServiceError, Result
 };
-use shared_rust::s3::S3Service;
+use shared_rust::s3::{S3Service, config::S3BucketType};
 
 pub struct GitService {
     s3_service: S3Service,
@@ -22,13 +22,14 @@ impl GitService {
         let repository = Repository::new(request.name, request.owner, request.description);
         
         // Check if repository already exists
-        if self.s3_service.object_exists(&repository.metadata_key()).await? {
+        if self.s3_service.object_exists(S3BucketType::GitRepositories, &repository.metadata_key()).await? {
             return Err(GitServiceError::RepositoryAlreadyExists(repository.id.clone()));
         }
 
         // Save repository metadata
         let repo_json = serde_json::to_string(&repository)?;
         self.s3_service.put_object(
+            S3BucketType::GitRepositories,
             &repository.metadata_key(),
             Bytes::from(repo_json)
         ).await?;
@@ -39,11 +40,11 @@ impl GitService {
     pub async fn get_repository(&self, repository_id: &str) -> Result<Repository> {
         let metadata_key = format!("repositories/{}/repo_meta.json", repository_id);
         
-        if !self.s3_service.object_exists(&metadata_key).await? {
+        if !self.s3_service.object_exists(S3BucketType::GitRepositories, &metadata_key).await? {
             return Err(GitServiceError::RepositoryNotFound(repository_id.to_string()));
         }
 
-        let data = self.s3_service.get_object(&metadata_key).await?;
+        let data = self.s3_service.get_object(S3BucketType::GitRepositories, &metadata_key).await?;
         let repository: Repository = serde_json::from_slice(&data)?;
         
         Ok(repository)
@@ -92,7 +93,7 @@ impl GitService {
             // Store file content
             let file_key = format!("repositories/{}/files/{}", 
                 request.repository_id, file_hash);
-            self.s3_service.put_object(&file_key, Bytes::from(content)).await?;
+            self.s3_service.put_object(S3BucketType::GitRepositories, &file_key, Bytes::from(content)).await?;
             
             commit_files.push(commit_file);
         }
@@ -140,6 +141,7 @@ impl GitService {
         // Store commit metadata
         let metadata_json = serde_json::to_string(&metadata)?;
         self.s3_service.put_object(
+            S3BucketType::GitRepositories,
             &commit.metadata_key(),
             Bytes::from(metadata_json)
         ).await?;
@@ -149,6 +151,7 @@ impl GitService {
         repository.updated_at = Utc::now();
         let repo_json = serde_json::to_string(&repository)?;
         self.s3_service.put_object(
+            S3BucketType::GitRepositories,
             &repository.metadata_key(),
             Bytes::from(repo_json)
         ).await?;
@@ -164,11 +167,11 @@ impl GitService {
     pub async fn get_commit(&self, repository_id: &str, commit_id: String) -> Result<Commit> {
         let metadata_key = format!("repositories/{}/commits/{}/meta.json", repository_id, commit_id);
         
-        if !self.s3_service.object_exists(&metadata_key).await? {
+        if !self.s3_service.object_exists(S3BucketType::GitRepositories, &metadata_key).await? {
             return Err(GitServiceError::CommitNotFound(commit_id.to_string()));
         }
 
-        let data = self.s3_service.get_object(&metadata_key).await?;
+        let data = self.s3_service.get_object(S3BucketType::GitRepositories, &metadata_key).await?;
         let metadata: CommitMetadata = serde_json::from_slice(&data)?;
         
         Ok(metadata.commit)
@@ -177,11 +180,11 @@ impl GitService {
     pub async fn get_commit_details(&self, repository_id: &str, commit_id: String) -> Result<CommitDetailsResponse> {
         let metadata_key = format!("repositories/{}/commits/{}/meta.json", repository_id, commit_id);
         
-        if !self.s3_service.object_exists(&metadata_key).await? {
+        if !self.s3_service.object_exists(S3BucketType::GitRepositories, &metadata_key).await? {
             return Err(GitServiceError::CommitNotFound(commit_id.to_string()));
         }
 
-        let data = self.s3_service.get_object(&metadata_key).await?;
+        let data = self.s3_service.get_object(S3BucketType::GitRepositories, &metadata_key).await?;
         let metadata: CommitMetadata = serde_json::from_slice(&data)?;
         
         Ok(CommitDetailsResponse {
@@ -201,7 +204,7 @@ impl GitService {
         self.get_repository(repository_id).await?;
 
         let prefix = format!("repositories/{}/commits/", repository_id);
-        let keys = self.s3_service.list_objects_with_prefix(&prefix).await?;
+        let keys = self.s3_service.list_objects_with_prefix(S3BucketType::GitRepositories, &prefix).await?;
 
         // Filter only metadata files
         let metadata_keys: Vec<String> = keys
@@ -213,7 +216,7 @@ impl GitService {
 
         // Load each commit metadata
         for key in metadata_keys {
-            if let Ok(data) = self.s3_service.get_object(&key).await {
+            if let Ok(data) = self.s3_service.get_object(S3BucketType::GitRepositories, &key).await {
                 if let Ok(metadata) = serde_json::from_slice::<CommitMetadata>(&data) {
                     commits.push(metadata.commit);
                 }
@@ -250,11 +253,11 @@ impl GitService {
             commit.storage_key()
         };
         
-        if !self.s3_service.object_exists(&file_key).await? {
+        if !self.s3_service.object_exists(S3BucketType::GitRepositories, &file_key).await? {
             return Err(GitServiceError::FileNotFound(file_key));
         }
 
-        self.s3_service.get_object(&file_key).await.map_err(|e| e.into())
+        self.s3_service.get_object(S3BucketType::GitRepositories, &file_key).await.map_err(|e| e.into())
     }
 
     // Private helper methods for realistic SHA generation
@@ -305,14 +308,14 @@ impl GitService {
     // Health check methods
     pub async fn health_check(&self) -> Result<()> {
         // Try to list objects in the bucket to verify S3 connectivity
-        let _ = self.s3_service.list_objects_with_prefix("health_check/").await?;
+        let _ = self.s3_service.list_objects_with_prefix(S3BucketType::GitRepositories, "health_check/").await?;
         Ok(())
     }
 
     // Repository listing (for admin purposes)
     pub async fn list_repositories(&self) -> Result<Vec<Repository>> {
         let prefix = "repositories/";
-        let keys = self.s3_service.list_objects_with_prefix(prefix).await?;
+        let keys = self.s3_service.list_objects_with_prefix(S3BucketType::GitRepositories, prefix).await?;
 
         let metadata_keys: Vec<String> = keys
             .into_iter()
@@ -322,7 +325,7 @@ impl GitService {
         let mut repositories = Vec::new();
 
         for key in metadata_keys {
-            if let Ok(data) = self.s3_service.get_object(&key).await {
+            if let Ok(data) = self.s3_service.get_object(S3BucketType::GitRepositories, &key).await {
                 if let Ok(repository) = serde_json::from_slice::<Repository>(&data) {
                     repositories.push(repository);
                 }

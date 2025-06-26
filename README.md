@@ -47,7 +47,7 @@ It eliminates folder trees, embraces version timelines, and enables structured f
 
 **Microservices:**
 
-- `file-service`: presigned uploads, metadata updates, event publication
+- `file-service`: presigned S3 uploads, PostgreSQL metadata, Redis cache, SQS events
 - `git-service`: Git bare repo management, version diff, push/pull
 - `user-service`: user management, authentication, billing sync
 - `search-service`: search proxy interface
@@ -89,6 +89,55 @@ npx turbo run dev
 ```
 
 Rust and TypeScript services are coordinated using a polyglot monorepo setup.
+
+### 🚀 Quick Start (File Service)
+
+Start the complete development stack:
+```bash
+./scripts/start-dev-stack.sh
+```
+
+Or start just the file service:
+```bash
+./scripts/dev-file-service.sh
+```
+
+Test the file service API:
+```bash
+./scripts/test-file-service.sh
+```
+
+Stop all services:
+```bash
+./scripts/stop-dev-stack.sh
+```
+
+### 🔧 File Service Features
+
+The **file-service** is a comprehensive Rust-based microservice that handles:
+
+- **📤 Secure File Uploads**: Generates presigned S3 URLs with KMS encryption
+- **🗄️ Metadata Management**: PostgreSQL storage with Redis caching
+- **🔄 Git Integration**: Automatic versioning via git-service API calls
+- **📨 Event Publishing**: SQS messages for async processing and notifications
+- **🔒 Security**: IAM, KMS encryption, file type validation, size limits
+- **⚡ Performance**: Redis caching, connection pooling, async processing
+
+#### API Endpoints:
+- `POST /files/prepare` - Prepare file upload (get presigned URL)
+- `POST /files/complete` - Complete upload and trigger processing
+- `GET /files/:id` - Get file metadata and download URL
+- `GET /files` - List files with pagination and filtering
+- `DELETE /files/:id` - Soft delete file
+- `GET /stats` - File statistics
+- `GET /health` - Health check
+
+#### Technologies:
+- **Rust + Axum**: High-performance async web framework
+- **AWS SDK**: S3, SQS, KMS, IAM integration
+- **PostgreSQL + sqlx**: Reliable metadata storage
+- **Redis**: Fast metadata caching
+- **Docker**: Containerized deployment
 
 ---
 
