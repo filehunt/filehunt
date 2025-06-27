@@ -200,36 +200,79 @@ pub async fn complete_upload(
     let default_message = format!("Add file: {}", file_metadata.filename);
     let commit_message = file_version.commit_message.as_deref().unwrap_or(&default_message);
 
-    let git_commit_hash = match state
-        .git_service
-        .create_commit(
-            &repository_id,
-            &file_path,
-            &file_version.s3_key,
-            commit_message,
-            "File Service",
-            "file-service@filehunt.app",
-        )
-        .await
-    {
-        Ok(commit) => {
-            info!("Created git commit: {}", commit.commit_hash);
-            
-            // Update version with commit hash
-            if let Err(err) = state
-                .database_service
-                .update_version_commit_hash(request.version_id, &commit.commit_hash)
-                .await
-            {
-                error!("Failed to update git commit hash: {}", err);
+    // Check git service health first
+    let git_service_available = match state.git_service.health_check().await {
+        Ok(healthy) => {
+            if healthy {
+                info!("Git service is healthy, proceeding with commit creation");
+                true
+            } else {
+                warn!("Git service health check failed");
+                false
             }
-            
-            Some(commit.commit_hash)
         }
         Err(err) => {
-            warn!("Failed to create git commit: {}", err);
-            None
+            warn!("Git service health check error: {}", err);
+            false
         }
+    };
+
+    // Try to create git commit with retries
+    let git_commit_hash = if git_service_available {
+        let mut attempts = 0;
+        let max_attempts = 3;
+        let mut last_error = None;
+        
+        loop {
+            attempts += 1;
+            
+            match state
+                .git_service
+                .create_commit(
+                    &repository_id,
+                    &file_path,
+                    &file_version.s3_key,
+                    commit_message,
+                    "File Service",
+                    "file-service@filehunt.app",
+                )
+                .await
+            {
+                Ok(commit) => {
+                    info!("Created git commit: {} (attempt {})", commit.commit_hash, attempts);
+                    
+                    // Update version with commit hash
+                    if let Err(err) = state
+                        .database_service
+                        .update_version_commit_hash(request.version_id, &commit.commit_hash)
+                        .await
+                    {
+                        error!("Failed to update git commit hash: {}", err);
+                    }
+                    
+                    break Some(commit.commit_hash);
+                }
+                Err(err) => {
+                    warn!("Failed to create git commit (attempt {}): {}", attempts, err);
+                    last_error = Some(err);
+                    
+                    if attempts >= max_attempts {
+                        error!("Git commit failed after {} attempts. Last error: {:?}", max_attempts, last_error);
+                        
+                        // If git service is completely unavailable, we should still allow the upload
+                        // but mark it clearly that git commit failed
+                        warn!("Proceeding with upload completion despite git commit failure");
+                        break None;
+                    }
+                    
+                    // Wait before retry
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500 * attempts as u64)).await;
+                }
+            }
+        }
+    } else {
+        warn!("Git service is not available, skipping commit creation");
+        None
     };
 
     // Update version status to ready
