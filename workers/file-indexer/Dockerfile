@@ -6,17 +6,16 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
-    libgit2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy shared rust package first
 COPY packages/shared-rust ./packages/shared-rust
 
-# Copy the git-service
-COPY apps/git-service ./apps/git-service
+# Copy the file-indexer
+COPY workers/file-indexer ./workers/file-indexer
 
 # Build the application
-WORKDIR /app/apps/git-service
+WORKDIR /app/workers/file-indexer
 RUN cargo build --release
 
 # Runtime stage
@@ -28,17 +27,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     libssl3 \
-    libgit2-1.5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the binary
-COPY --from=builder /app/apps/git-service/target/release/git-service /app/git-service
+COPY --from=builder /app/workers/file-indexer/target/release/file-indexer /app/file-indexer
 
-# Create directories
-RUN mkdir -p /var/git-repositories /var/log/git-service
-
-# Expose port
-EXPOSE 3000
+# Create log directory
+RUN mkdir -p /var/log/file-indexer
 
 # Run the application
-CMD ["./git-service"]
+CMD ["./file-indexer"]

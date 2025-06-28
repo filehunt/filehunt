@@ -131,7 +131,7 @@ services:
     networks:
       - filehunt-network
 
-  # Git Service (uncommented and updated)
+  # Git Service
   git-service:
     build: 
       context: .
@@ -155,6 +155,89 @@ services:
         condition: service_healthy
       aws-setup:
         condition: service_completed_successfully
+    networks:
+      - filehunt-network
+
+  # File Worker
+  file-worker:
+    build:
+      context: .
+      dockerfile: workers/file-worker/Dockerfile
+    container_name: filehunt-file-worker
+    environment:
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - SQS_ENDPOINT=http://localstack:4566
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/filehunt-file-processing
+      - S3_ENDPOINT=http://localstack:4566
+      - S3_FILE_BUCKET=filehunt-files
+      - S3_PROCESSING_BUCKET=filehunt-processing
+      - LOG_LEVEL=info
+      - RUST_LOG=info
+    volumes:
+      - ./tmp/logs:/var/log/file-worker
+    depends_on:
+      localstack:
+        condition: service_healthy
+      aws-setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - filehunt-network
+
+  # File Indexer Worker
+  file-indexer:
+    build:
+      context: .
+      dockerfile: workers/file-indexer/Dockerfile
+    container_name: filehunt-file-indexer
+    environment:
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - SQS_ENDPOINT=http://localstack:4566
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/filehunt-indexing
+      - DATABASE_URL=postgresql://filehunt:filehunt_password@postgres:5432/filehunt
+      - S3_ENDPOINT=http://localstack:4566
+      - S3_FILE_BUCKET=filehunt-files
+      - LOG_LEVEL=info
+      - RUST_LOG=info
+    volumes:
+      - ./tmp/logs:/var/log/file-indexer
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      aws-setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - filehunt-network
+
+  # Notification Worker
+  notification-worker:
+    build:
+      context: .
+      dockerfile: workers/notification-worker/Dockerfile
+    container_name: filehunt-notification-worker
+    environment:
+      - NODE_ENV=production
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - SQS_ENDPOINT=http://localstack:4566
+      - SQS_NOTIFICATION_QUEUE_URL=http://localstack:4566/000000000000/filehunt-notifications
+      - LOG_LEVEL=info
+    volumes:
+      - ./tmp/logs:/var/log/notification-worker
+    depends_on:
+      localstack:
+        condition: service_healthy
+      aws-setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
     networks:
       - filehunt-network
 

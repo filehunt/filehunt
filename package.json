@@ -10,7 +10,11 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:e2e": "turbo run test:e2e",
+    "format": "turbo run format",
+    "start": "turbo run start"
   },
   "packageManager": "npm@10.2.4",
   "devDependencies": {

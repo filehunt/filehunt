@@ -1,14 +1,14 @@
 # File Service
 
-Service de gestion de fichiers et versioning Git pour l'architecture SaaS Filehunt.
+File management and Git versioning service for the Filehunt SaaS architecture.
 
-## Fonctionnalités
+## Features
 
-- **Upload sécurisé** : Génération d'URLs pré-signées S3 avec chiffrement KMS
-- **Versioning Git** : Intégration avec git-service pour le versioning des fichiers
-- **Métadonnées** : Stockage PostgreSQL avec cache Redis
-- **Traitement asynchrone** : Messages SQS pour le traitement en arrière-plan
-- **Notifications** : Système de notifications via SQS
+- **Secure Upload**: S3 pre-signed URL generation with KMS encryption
+- **Git Versioning**: Integration with git-service for file versioning
+- **Metadata**: PostgreSQL storage with Redis cache
+- **Asynchronous Processing**: SQS messages for background processing
+- **Notifications**: Notification system via SQS
 
 ## Architecture
 
@@ -28,20 +28,20 @@ Client -> File Service -> S3 (upload)
 - `GET /live` - Liveness check
 
 ### File Operations
-- `POST /files/prepare` - Préparer un upload
-- `POST /files/complete` - Compléter un upload
-- `GET /files/:file_id` - Récupérer un fichier
-- `DELETE /files/:file_id` - Supprimer un fichier
-- `GET /files` - Lister les fichiers
+- `POST /files/prepare` - Prepare an upload
+- `POST /files/complete` - Complete an upload
+- `GET /files/:file_id` - Retrieve a file
+- `DELETE /files/:file_id` - Delete a file
+- `GET /files` - List files
 
 ### Statistics
-- `GET /stats` - Statistiques des fichiers
+- `GET /stats` - File statistics
 
 ## Configuration
 
-Voir `.env.example` pour la configuration complète.
+See `.env.example` for complete configuration.
 
-### Variables principales
+### Main Variables
 
 ```env
 SERVER_PORT=3001
@@ -51,27 +51,27 @@ S3_BUCKET=filehunt-files
 GIT_SERVICE_URL=http://localhost:3000
 ```
 
-## Développement
+## Development
 
-### Prérequis
+### Prerequisites
 - Rust 1.75+
 - PostgreSQL 16+
 - Redis 7+
-- LocalStack (pour AWS services)
+- LocalStack (for AWS services)
 
 ### Installation
 
-1. Copier la configuration :
+1. Copy configuration:
 ```bash
 cp .env.example .env
 ```
 
-2. Démarrer les services :
+2. Start services:
 ```bash
 docker-compose up postgres redis localstack aws-setup
 ```
 
-3. Lancer le service :
+3. Run the service:
 ```bash
 cargo run
 ```
@@ -82,7 +82,7 @@ cargo run
 cargo test
 ```
 
-## Déploiement
+## Deployment
 
 ### Docker
 
@@ -92,52 +92,52 @@ docker-compose up file-service
 
 ### Production
 
-1. Configurer les variables d'environnement AWS réelles
-2. Utiliser une base PostgreSQL managée
-3. Utiliser Redis managé
-4. Configurer les bonnes URLs des services
+1. Configure real AWS environment variables
+2. Use managed PostgreSQL database
+3. Use managed Redis
+4. Configure proper service URLs
 
-## Flux de données
+## Data Flow
 
-### Upload de fichier
+### File Upload
 
-1. **Préparation** : `POST /files/prepare`
-   - Validation du fichier
-   - Génération URL pré-signée S3
-   - Création métadonnées (status: uploading)
+1. **Preparation**: `POST /files/prepare`
+   - File validation
+   - S3 pre-signed URL generation
+   - Metadata creation (status: uploading)
 
-2. **Upload** : Client -> S3 directement
+2. **Upload**: Client -> S3 directly
 
-3. **Complétion** : `POST /files/complete`
-   - Vérification fichier S3
-   - Commit git-service
-   - Mise à jour métadonnées (status: ready)
-   - Messages SQS (processing + notification)
+3. **Completion**: `POST /files/complete`
+   - S3 file verification
+   - Git-service commit
+   - Metadata update (status: ready)
+   - SQS messages (processing + notification)
 
-### Traitement asynchrone
+### Asynchronous Processing
 
-- **file-processing-queue** : Traitement du fichier (preview, transcodage)
-- **notifications-queue** : Notifications utilisateur
+- **file-processing-queue**: File processing (preview, transcoding)
+- **notifications-queue**: User notifications
 
-## Services utilisés
+## Services Used
 
-- **S3** : Stockage fichiers avec chiffrement KMS
-- **SQS** : Files de traitement et notifications (FIFO)
-- **KMS** : Chiffrement des fichiers
-- **PostgreSQL** : Métadonnées des fichiers
-- **Redis** : Cache des métadonnées et URLs pré-signées
+- **S3**: File storage with KMS encryption
+- **SQS**: Processing and notification queues (FIFO)
+- **KMS**: File encryption
+- **PostgreSQL**: File metadata
+- **Redis**: Metadata cache and pre-signed URLs
 
-## Sécurité
+## Security
 
-- Chiffrement KMS pour tous les fichiers S3
-- Validation des types de fichiers
-- Limitation de taille des fichiers
-- URLs pré-signées avec expiration
-- Isolation par utilisateur
+- KMS encryption for all S3 files
+- File type validation
+- File size limitations
+- Pre-signed URLs with expiration
+- User isolation
 
 ## Monitoring
 
-- Health checks pour tous les services
-- Logs structurés avec tracing
-- Métriques de performance
-- Cache pour optimiser les performances
+- Health checks for all services
+- Structured logs with tracing
+- Performance metrics
+- Cache for performance optimization

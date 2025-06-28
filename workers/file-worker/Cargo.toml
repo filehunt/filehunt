@@ -1,6 +1,16 @@
 [package]
 name = "file-worker"
 version = "0.0.1"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
+aws-sdk-sqs = "1.50.0"
+aws-config = "1.5.6"
+tokio = { version = "1.35.0", features = ["full"] }
+serde = { version = "1.0.193", features = ["derive"] }
+serde_json = "1.0.108"
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+anyhow = "1.0.75"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.10", features = ["v4", "serde"] }

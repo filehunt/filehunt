@@ -281,46 +281,13 @@ pub async fn complete_upload(
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     }
 
-    // Publish file uploaded event
+    // Publish single file uploaded event - consumers will decide what to do with it
     if let Err(err) = state
         .messaging_service
         .publish_file_uploaded_event(&file_metadata, &file_version)
         .await
     {
         error!("Failed to publish file uploaded event: {}", err);
-    }
-
-    // Publish processing job for supported file types
-    let processing_params = serde_json::json!({
-        "generate_thumbnail": true,
-        "extract_metadata": true,
-        "virus_scan": true
-    });
-
-    let job_type = match file_metadata.content_type.as_str() {
-        ct if ct.starts_with("image/") => Some(ProcessingJobType::ThumbnailGeneration),
-        ct if ct.starts_with("video/") => Some(ProcessingJobType::VideoTranscode),
-        "application/pdf" => Some(ProcessingJobType::DocumentPreview),
-        _ => None,
-    };
-
-    if let Some(job_type) = job_type {
-        if let Err(err) = state
-            .messaging_service
-            .publish_processing_job(&file_metadata, &file_version, job_type, processing_params)
-            .await
-        {
-            error!("Failed to publish processing job: {}", err);
-        }
-    }
-
-    // Send upload complete notification
-    if let Err(err) = state
-        .messaging_service
-        .publish_upload_complete_notification(&file_metadata, &file_version)
-        .await
-    {
-        error!("Failed to send upload complete notification: {}", err);
     }
 
     // Update cache

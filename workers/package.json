@@ -1,0 +1,16 @@
+{
+  "name": "filehunt-workers",
+  "version": "1.0.0",
+  "description": "Test utilities for Filehunt workers",
+  "main": "test-event.js",
+  "scripts": {
+    "test:event": "node test-event.js",
+    "test:multiple": "node test-event.js --multiple"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1691.0"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "MIT"
+}

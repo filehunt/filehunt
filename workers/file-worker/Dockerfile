@@ -6,17 +6,16 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
-    libgit2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy shared rust package first
 COPY packages/shared-rust ./packages/shared-rust
 
-# Copy the git-service
-COPY apps/git-service ./apps/git-service
+# Copy the file-worker
+COPY workers/file-worker ./workers/file-worker
 
 # Build the application
-WORKDIR /app/apps/git-service
+WORKDIR /app/workers/file-worker
 RUN cargo build --release
 
 # Runtime stage
@@ -28,17 +27,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     libssl3 \
-    libgit2-1.5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the binary
-COPY --from=builder /app/apps/git-service/target/release/git-service /app/git-service
+COPY --from=builder /app/workers/file-worker/target/release/file-worker /app/file-worker
 
-# Create directories
-RUN mkdir -p /var/git-repositories /var/log/git-service
-
-# Expose port
-EXPOSE 3000
+# Create log directory
+RUN mkdir -p /var/log/file-worker
 
 # Run the application
-CMD ["./git-service"]
+CMD ["./file-worker"]

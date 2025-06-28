@@ -1,4 +1,4 @@
-FROM rust:1.75-slim as builder
+FROM rust:1.87-slim AS builder
 
 WORKDIR /app
 
@@ -9,9 +9,10 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy workspace files
-COPY Cargo.toml Cargo.lock ./
-COPY packages ./packages
+# Copy shared rust package first
+COPY packages/shared-rust ./packages/shared-rust
+
+# Copy the file-service
 COPY apps/file-service ./apps/file-service
 
 # Build the application

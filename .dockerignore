@@ -1,0 +1,59 @@
+# Version control
+.git/
+.gitignore
+
+# Build artifacts
+**/target/
+**/node_modules/
+**/dist/
+**/build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+tmp/logs/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Package manager files
+**/yarn.lock
+# Keep Cargo.lock files for reproducible builds
+# **/Cargo.lock
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Scripts (keep only necessary ones)
+scripts/
+!scripts/init-db.sql
+!scripts/setup-aws-messaging.sh
+
+# Testing
+e2e/
+**/*test*
+
+# Temp files
+tmp/
+*.tmp
+*.temp
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*
+.dockerignore
