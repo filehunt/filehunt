@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Filehunt Web App
+
+Next.js web application for the Filehunt Digital Asset Management platform.
+
+## Overview
+
+This is the main web application that provides the user interface for Filehunt DAM. It's built with Next.js 15 and uses shared components from `@filehunt/shared-ts`.
+
+## Features
+
+- **Digital Asset Management Interface** - Complete DAM functionality through shared components
+- **Next.js App Router** - Modern routing with the app directory
+- **Server-Side Rendering** - Optimized performance with SSR
+- **Responsive Design** - Works on desktop and mobile devices
+- **Dark/Light Mode** - Theme switching support
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm 8+
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install dependencies (from project root)
+npm install
+
+# Or install locally
+cd apps/web
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Start development server
+npm run dev
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Or from project root
+cd apps/web && npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+### Production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Build for production
+npm run build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Start production server
+npm run start
+```
 
-## Deploy on Vercel
+## Routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `/` - Landing page with navigation to DAM app
+- `/dam` - Full Digital Asset Management application
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Structure
+
+```
+apps/web/
+├── src/
+│   └── app/
+│       ├── globals.css      # Global styles
+│       ├── layout.tsx       # Root layout
+│       ├── page.tsx         # Home page
+│       ├── dam/
+│       │   └── page.tsx     # DAM application page
+│       └── styles/
+│           └── globals.css  # Shared component styles
+├── public/                  # Static assets
+├── next.config.ts          # Next.js configuration
+├── package.json
+└── tsconfig.json
+```
+
+## Dependencies
+
+### Main Dependencies
+- `next` - Next.js framework
+- `react` - React library
+- `react-dom` - React DOM
+- `@filehunt/shared-ts` - Shared components and utilities
+
+### Development Dependencies
+- `typescript` - TypeScript support
+- `@types/*` - Type definitions
+- `tailwindcss` - Utility-first CSS
+- `eslint` - Code linting
+
+## Configuration
+
+### Next.js Configuration
+
+The app is configured to:
+- Ignore TypeScript errors during build (temporary)
+- Ignore ESLint errors during build (temporary)
+- Support the app directory structure
+
+### TypeScript
+
+Full TypeScript support with strict mode disabled for rapid development.
+
+### Tailwind CSS
+
+Configured for utility-first styling with custom design tokens.
+
+## Integration with Shared Components
+
+The web app imports components from `@filehunt/shared-ts`:
+
+```tsx
+import { FilehuntApp } from '@filehunt/shared-ts/simple';
+```
+
+Styles are imported from the shared package:
+
+```tsx
+import '../styles/globals.css';
+```
+
+## Development Workflow
+
+1. **Start the development server**: `npm run dev`
+2. **Make changes** to pages or components
+3. **Hot reload** will automatically update the browser
+4. **Build and test** before deploying: `npm run build`
+
+## Deployment
+
+The app can be deployed to any platform that supports Next.js:
+
+- **Vercel** (recommended for Next.js apps)
+- **Netlify**
+- **AWS Amplify**
+- **Docker containers**
+
+Build command: `npm run build`
+Start command: `npm run start`
+
+## Environment Variables
+
+Currently no environment variables are required, but you can add them in:
+- `.env.local` for local development
+- `.env.production` for production builds
+
+## Performance
+
+The app is optimized for performance with:
+- Static generation where possible
+- Automatic code splitting
+- Image optimization
+- CSS optimization
+
+## Contributing
+
+1. Make changes to the web app
+2. Test locally with `npm run dev`
+3. Build and verify with `npm run build`
+4. Update this README if adding new routes or major features
+
+## License
+
+MIT License - see LICENSE file for details.
