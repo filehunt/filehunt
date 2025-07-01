@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { FolderPlus, Folder } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Button, Input, Label, Textarea } from '../../shared';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Button, Input, Label, Textarea } from '@filehunt/shared-ts/ui';
 
 interface NewFolderDialogProps {
   isOpen: boolean;

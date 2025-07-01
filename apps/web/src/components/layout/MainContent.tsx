@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
-import { Button } from '../../shared';
-import { AssetCard, AppearancePopover, SortPopover } from '../../shared';
-import { type Asset } from '@shared-ts/types';
+import { Button } from '@filehunt/shared-ts/ui';
+import { AssetCard } from '../dam/AssetCard';
+import { AppearancePopover } from '../dam/AppearancePopover';
+import { SortPopover } from '../dam/SortPopover';
+import { type Asset } from "@filehunt/shared-ts/types";
 
 interface MainContentProps {
   selectedAssets: Asset[];

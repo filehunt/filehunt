@@ -13,7 +13,25 @@ export function useBranches() {
         description: branchData.description,
         parentBranch: branchData.parentBranch,
         createdAt: new Date().toISOString(),
-        createdBy: 'Current User',
+        createdBy: {
+          name: 'Current User',
+          avatar: 'CU'
+        },
+        isDefault: false,
+        isProtected: false,
+        commitsAhead: 0,
+        commitsBehind: 0,
+        lastCommit: {
+          id: '1',
+          message: 'Initial commit',
+          author: {
+            name: 'Current User',
+            avatar: 'CU'
+          },
+          timestamp: 'now',
+          hash: Math.random().toString(36).substr(2, 7)
+        },
+        assetCount: 0,
         isActive: false,
         commitCount: 0
       };

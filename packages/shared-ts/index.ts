@@ -1,14 +1,14 @@
-// Export all components
-export * from "./components";
+// Export all UI components (React-specific)
+export * from "./ui";
 
-// Export hooks
+// Export hooks (React-specific)
 export * from "./hooks";
 
-// Export utilities
+// Export utilities (generic)
 export * from "./utils";
 
-// Export types
+// Export types (generic)
 export * from "./types";
 
-// Export lib functions
+// Export lib functions (generic configuration)
 export * from "./lib";

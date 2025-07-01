@@ -1,9 +1,9 @@
 import { Upload, FolderOpen, Tag, Image, Video, Music, FileText, Layers } from 'lucide-react';
-import { type UploadFile } from '@shared-ts/types';
-import { Button } from '../shared'; //button';
-import { Badge } from '../shared'; //badge';
-import { Progress } from '../shared'; //progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../shared'; //select';
+import { type UploadFile } from "@filehunt/shared-ts/types";
+import { Button } from '@filehunt/shared-ts/ui'; //button';
+import { Badge } from '@filehunt/shared-ts/ui'; //badge';
+import { Progress } from '@filehunt/shared-ts/ui'; //progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@filehunt/shared-ts/ui'; //select';
 
 interface UploadLeftSidebarProps {
   uploadFiles: UploadFile[];

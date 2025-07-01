@@ -1,8 +1,8 @@
 import { FolderOpen, Plus, Star, Lock, Users, Search, Grid, List } from 'lucide-react';
-import { type Collection } from '@shared-ts/types';
-import { Input } from '../shared'; //input';
-import { Button } from '../shared'; //button';
-import { Badge } from '../shared'; //badge';
+import { type Collection } from "@filehunt/shared-ts/types";
+import { Input } from '@filehunt/shared-ts/ui'; //input';
+import { Button } from '@filehunt/shared-ts/ui'; //button';
+import { Badge } from '@filehunt/shared-ts/ui'; //badge';
 
 interface CollectionsLeftSidebarProps {
   collections: Collection[];

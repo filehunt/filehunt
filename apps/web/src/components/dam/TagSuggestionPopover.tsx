@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 
 import { Sparkles, Hash, Loader2, Check, Plus } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger, Button, Input, Badge } from '../../shared';
-import { type Asset } from '@shared-ts/types';
+import { Popover, PopoverContent, PopoverTrigger, Button, Input, Badge } from '@filehunt/shared-ts/ui';
+import { type Asset } from "@filehunt/shared-ts/types";
 
 interface TagSuggestionPopoverProps {
   asset: Asset;

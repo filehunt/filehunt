@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight, ChevronDown, Plus, Grid3X3, List, GalleryVerticalEnd, Search, Upload, FolderPlus, FolderOpen, Users, GitBranch, File } from 'lucide-react';
-import { Button, Popover, PopoverContent, PopoverTrigger, Separator } from '../../shared';
-import { NewFolderDialog } from '../../shared';
+import { Button, Popover, PopoverContent, PopoverTrigger, Separator } from '@filehunt/shared-ts/ui';
+import { NewFolderDialog } from '../dam/NewFolderDialog';
 
 interface HeaderProps {
   onViewChange?: (view: string) => void;

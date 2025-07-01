@@ -7,7 +7,7 @@ import {
   ImageIcon, Video, Music, MessageSquare, CheckCircle, Sparkles,
   MoreHorizontal
 } from 'lucide-react';
-import { Button, Badge } from '../../shared';
+import { Button, Badge } from '@filehunt/shared-ts/ui';
 
 interface BranchInfo {
   name: string;

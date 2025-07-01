@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { Star, ChevronDown } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger, Button, Switch } from '../../shared';
+import { Popover, PopoverContent, PopoverTrigger, Button, Switch } from '@filehunt/shared-ts/ui';
 
 interface FieldsSettings {
   view: 'compact' | 'detailed' | 'minimal';

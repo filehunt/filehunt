@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Send, ChevronDown, MoreHorizontal, Search, Download, Check, Paperclip, Smile, Globe, RotateCcw, ThumbsUp, AtSign, Filter, ArrowUpDown, Clock, GitCommit, GitBranch, GitMerge, Upload, Eye, X, AlertTriangle, FileUp, Settings } from 'lucide-react';
-import { Button, Textarea, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Avatar, AvatarImage, AvatarFallback, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '../shared';
-import { type Asset, type Comment, type TimelineCommit } from '@shared-ts/types';
+import { Button, Textarea, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Avatar, AvatarImage, AvatarFallback, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@filehunt/shared-ts/ui';
+import { type Asset, type Comment, type TimelineCommit } from "@filehunt/shared-ts/types";
 
 interface CommentThread {
   id: string;

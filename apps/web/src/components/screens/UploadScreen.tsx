@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Upload, X, File, Image, Video, Music, FileText, Plus, Check, AlertCircle, GitBranch, Eye, Clock, RefreshCw, GitCommit } from 'lucide-react';
-import { Button, Input, Textarea, Badge, Card, CardContent, CardHeader, CardTitle, Progress, Alert, AlertDescription, Separator } from '../../shared';
+import { Button, Input, Textarea, Badge, Card, CardContent, CardHeader, CardTitle, Progress, Alert, AlertDescription, Separator } from '@filehunt/shared-ts/ui';
 
 interface UploadFile {
   id: string;

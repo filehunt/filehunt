@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FolderOpen, Plus, Search, Grid, List, Eye, Star, Users, Lock, Unlock, Trash2, Edit3, MoreHorizontal } from 'lucide-react';
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Avatar, AvatarImage, AvatarFallback, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../shared';
-import { type Collection } from '@shared-ts/types';
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Avatar, AvatarImage, AvatarFallback, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@filehunt/shared-ts/ui';
+import { type Collection } from "@filehunt/shared-ts/types";
 
 interface CollectionsScreenProps {
   collections: Collection[];

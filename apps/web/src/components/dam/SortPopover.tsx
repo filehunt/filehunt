@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { Image as ImageIcon, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger, Button } from '../../shared';
+import { Popover, PopoverContent, PopoverTrigger, Button } from '@filehunt/shared-ts/ui';
 
 interface SortSettings {
   field: 'date-uploaded' | 'name' | 'size' | 'type' | 'uploader' | 'comments';

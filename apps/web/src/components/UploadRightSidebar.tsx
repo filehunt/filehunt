@@ -1,9 +1,9 @@
 import { CheckCircle, AlertCircle, Clock, Upload, X, FileType, Image, Video, Music, FileText, TrendingUp, Users, Tag } from 'lucide-react';
-import { type UploadFile } from '@shared-ts/types';
-import { Card, CardContent, CardHeader, CardTitle } from '../shared'; //card';
-import { Badge } from '../shared'; //badge';
-import { Button } from '../shared'; //button';
-import { Progress } from '../shared'; //progress';
+import { type UploadFile } from "@filehunt/shared-ts/types";
+import { Card, CardContent, CardHeader, CardTitle } from '@filehunt/shared-ts/ui'; //card';
+import { Badge } from '@filehunt/shared-ts/ui'; //badge';
+import { Button } from '@filehunt/shared-ts/ui'; //button';
+import { Progress } from '@filehunt/shared-ts/ui'; //progress';
 
 interface UploadRightSidebarProps {
   uploadFiles: UploadFile[];

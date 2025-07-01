@@ -7,7 +7,7 @@ GitCommit, MessageCircle, Trash2, Upload, Download,
   Filter, Search, Calendar, User, ChevronDown,
   MoreHorizontal, FileText, Image, Video, Music
 } from 'lucide-react';
-import { Button, Input, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Separator, Avatar, AvatarFallback } from '../../shared';
+import { Button, Input, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Separator, Avatar, AvatarFallback } from '@filehunt/shared-ts/ui';
 
 interface Activity {
   id: string;

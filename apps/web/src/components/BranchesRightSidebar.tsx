@@ -1,6 +1,6 @@
 import { GitBranch, GitCommit, GitMerge, User, Calendar, Tag, Eye, Download, Share2 } from 'lucide-react';
-import { Badge, Button, Avatar, AvatarImage, AvatarFallback } from '../shared';
-import { type Branch } from '@shared-ts/types';
+import { Badge, Button, Avatar, AvatarImage, AvatarFallback } from '@filehunt/shared-ts/ui';
+import { type Branch } from "@filehunt/shared-ts/types";
 
 interface BranchesRightSidebarProps {
   selectedBranch: Branch | null;

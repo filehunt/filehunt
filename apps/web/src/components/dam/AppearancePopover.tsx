@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { LayoutGrid, ChevronDown, Info } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger, Button, Badge, Switch } from '../../shared';
+import { Popover, PopoverContent, PopoverTrigger, Button, Badge, Switch } from '@filehunt/shared-ts/ui';
 
 interface AppearanceSettings {
   cardSize: 'S' | 'M' | 'L';

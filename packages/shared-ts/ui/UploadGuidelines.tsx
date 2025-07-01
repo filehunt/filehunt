@@ -1,6 +1,6 @@
 import { CheckCircle, HelpCircle } from 'lucide-react';
-import { Button } from '../ui/button';
-import { UPLOAD_GUIDELINES } from '../../utils/constants';
+import { Button } from './button';
+import { UPLOAD_GUIDELINES } from '../utils/constants';
 
 interface UploadGuidelinesProps {
   variant?: 'sidebar' | 'inline';

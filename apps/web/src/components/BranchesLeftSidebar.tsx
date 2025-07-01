@@ -1,6 +1,6 @@
 import { GitBranch, GitCommit, Plus, Search, Filter, Tag, User, Calendar } from 'lucide-react';
-import { Input, Button, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../shared';
-import { type Branch } from '@shared-ts/types';
+import { Input, Button, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@filehunt/shared-ts/ui';
+import { type Branch } from "@filehunt/shared-ts/types";
 
 interface BranchesLeftSidebarProps {
   branches: Branch[];

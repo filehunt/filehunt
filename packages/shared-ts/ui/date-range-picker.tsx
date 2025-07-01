@@ -45,13 +45,13 @@ export function DatePickerWithRange({ value, onChange, placeholder = "Pick a dat
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-[#2a2d3a] border-[#3a3d4a]" align="start">
-        <CalendarComponent
+        {/* <CalendarComponent
           mode="range"
           selected={range}
           onSelect={handleSelect}
           numberOfMonths={2}
           className="text-white"
-        />
+        > */}
       </PopoverContent>
     </Popover>
   );

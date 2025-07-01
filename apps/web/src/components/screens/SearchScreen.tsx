@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, X, Calendar, Tag, Folder, User, Clock, SortAsc, SortDesc, BookmarkPlus } from 'lucide-react';
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DatePickerWithRange, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../shared';
-import { AssetCard } from '../../shared';
-import { type Asset, type SearchFilters } from '@shared-ts/types';
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, DatePickerWithRange, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@filehunt/shared-ts/ui';
+import { AssetCard } from '../dam/AssetCard';
+import { type Asset, type SearchFilters } from "@filehunt/shared-ts/types";
 
 interface SearchScreenProps {
   filters: SearchFilters;

@@ -7,7 +7,7 @@ User, CreditCard, Users, Palette, Zap, Keyboard,
   Mail, Smartphone, Globe, Lock, Key, Download,
   HelpCircle, ExternalLink
 } from 'lucide-react';
-import { Button, Input, Switch, Badge, Separator, Avatar, AvatarFallback, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../shared';
+import { Button, Input, Switch, Badge, Separator, Avatar, AvatarFallback, Card, CardContent, CardDescription, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@filehunt/shared-ts/ui';
 
 type SettingsSection = 'account' | 'billing' | 'teams' | 'appearance' | 'features' | 'shortcuts' | 'notifications' | 'privacy' | 'about';
 

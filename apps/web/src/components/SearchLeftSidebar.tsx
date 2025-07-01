@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, Tag, Folder, Calendar, User, Clock, Bookmark, Trash2, Plus, X, Star, Image, Play, Mic, MessageCircle, SquareDashedMousePointer } from 'lucide-react';
-import { type SearchFilters } from '@shared-ts/types';
-import { Input } from '../shared'; //input';
-import { Button } from '../shared'; //button';
-import { Card, CardContent, CardHeader, CardTitle } from '../shared'; //card';
-import { Badge } from '../shared'; //badge';
-import { Checkbox } from '../shared'; //checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../shared'; //select';
+import { type SearchFilters } from "@filehunt/shared-ts/types";
+import { Input } from '@filehunt/shared-ts/ui'; //input';
+import { Button } from '@filehunt/shared-ts/ui'; //button';
+import { Card, CardContent, CardHeader, CardTitle } from '@filehunt/shared-ts/ui'; //card';
+import { Badge } from '@filehunt/shared-ts/ui'; //badge';
+import { Checkbox } from '@filehunt/shared-ts/ui'; //checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@filehunt/shared-ts/ui'; //select';
 
 interface SearchLeftSidebarProps {
   filters: SearchFilters;

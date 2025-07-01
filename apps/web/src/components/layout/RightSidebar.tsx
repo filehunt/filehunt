@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { X, Calendar, User, FileIcon, Eye, Tag, Folder, Plus, MessageCircle, GitBranch, GitCommit, GitMerge } from 'lucide-react';
-import { Button, Badge, Separator, Input, Tabs, TabsContent, TabsList, TabsTrigger } from '../../shared';
-import { TagSuggestionPopover } from '../../shared';
-import { type Asset } from '@shared-ts/types';
+import { Button, Badge, Separator, Input, Tabs, TabsContent, TabsList, TabsTrigger } from '@filehunt/shared-ts/ui';
+import { TagSuggestionPopover } from '../dam/TagSuggestionPopover';
+import { type Asset } from "@filehunt/shared-ts/types";
 
 interface TimelineCommit {
   id: string;

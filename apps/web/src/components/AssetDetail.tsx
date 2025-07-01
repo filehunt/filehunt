@@ -1,8 +1,7 @@
 import { ArrowLeft, Download, Share2, MoreHorizontal, Play, Pause, Volume2, VolumeX, Maximize, Copy, Archive, Heart, Lock, Unlock, RefreshCw, Trash2, Eye, EyeOff, Star, GitBranch, Upload, ExternalLink, Check, Clock, AlertTriangle, Plus } from 'lucide-react';
-import { Button, Badge, Card, CardContent, CardHeader, CardTitle } from '../shared';
-import { TagSuggestionPopover } from '../shared';
-import { ImageWithFallback } from '../shared';
-import { type Asset } from '@shared-ts/types';
+import { Button, Badge, Card, CardContent, CardHeader, CardTitle, ImageWithFallback } from '@filehunt/shared-ts/ui';
+import { TagSuggestionPopover } from './dam/TagSuggestionPopover';
+import { type Asset } from '@filehunt/shared-ts/types';
 
 import { useState } from 'react';
 

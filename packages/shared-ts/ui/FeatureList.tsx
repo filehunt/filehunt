@@ -1,4 +1,4 @@
-import { KEY_FEATURES } from '../../utils/constants';
+import { KEY_FEATURES } from '../utils/constants';
 
 interface FeatureListProps {
   title?: string;

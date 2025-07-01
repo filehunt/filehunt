@@ -11,10 +11,19 @@ export function useCollections() {
         id: Math.random().toString(36).substr(2, 9),
         name: collectionData.name,
         description: collectionData.description,
+        assetCount: 0,
+        isPrivate: false,
+        isFavorited: false,
+        owner: {
+          name: 'Current User',
+          avatar: 'CU'
+        },
+        collaborators: [],
         assets: [],
         createdAt: new Date().toISOString(),
-        createdBy: 'Current User',
-        collaborators: []
+        updatedAt: new Date().toISOString(),
+        tags: [],
+        createdBy: 'Current User'
       };
 
       setCollections(prev => [...prev, newCollection]);

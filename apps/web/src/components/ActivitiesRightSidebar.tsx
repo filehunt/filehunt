@@ -5,12 +5,12 @@ import {
   User, Calendar, Hash, FileText, Image, Video, Music,
   MoreHorizontal, Copy, ExternalLink
 } from 'lucide-react';
-import { Button } from '../shared'; //button';
-import { Badge } from '../shared'; //badge';
-import { Separator } from '../shared'; //separator';
-import { Avatar, AvatarFallback } from '../shared'; //avatar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../shared'; //card';
-import { ScrollArea } from '../shared'; //scroll-area';
+import { Button } from '@filehunt/shared-ts/ui'; //button';
+import { Badge } from '@filehunt/shared-ts/ui'; //badge';
+import { Separator } from '@filehunt/shared-ts/ui'; //separator';
+import { Avatar, AvatarFallback } from '@filehunt/shared-ts/ui'; //avatar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@filehunt/shared-ts/ui'; //card';
+import { ScrollArea } from '@filehunt/shared-ts/ui'; //scroll-area';
 
 interface Activity {
   id: string;

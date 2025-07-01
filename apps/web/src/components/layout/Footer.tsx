@@ -1,6 +1,6 @@
 import { Star, Download, Share, Copy, Trash2, Move, MoreHorizontal, X } from 'lucide-react';
-import { Button } from '../../shared';
-import { type Asset } from '@shared-ts/types';
+import { Button } from '@filehunt/shared-ts/ui';
+import { type Asset } from "@filehunt/shared-ts/types";
 
 interface FooterProps {
   selectedAssets: Asset[];

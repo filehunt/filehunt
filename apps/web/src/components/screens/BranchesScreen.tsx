@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GitBranch, GitCommit, GitMerge, Plus, Search, Eye, Trash2, MoreHorizontal, User, Clock, Tag } from 'lucide-react';
-import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Avatar, AvatarImage, AvatarFallback, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../shared';
-import { type Branch } from '@shared-ts/types';
+import { Button, Input, Card, CardContent, CardHeader, CardTitle, Badge, Avatar, AvatarImage, AvatarFallback, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@filehunt/shared-ts/ui';
+import { type Branch } from "@filehunt/shared-ts/types";
 
 interface Commit {
   id: string;

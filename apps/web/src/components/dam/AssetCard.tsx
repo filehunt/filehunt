@@ -1,6 +1,6 @@
 import { MessageCircle, Check, Play, Image, Volume2, FileText } from 'lucide-react';
-import { Badge } from '../../shared';
-import { type Asset } from '@shared-ts/types';
+import { Badge } from '@filehunt/shared-ts/ui';
+import { type Asset } from "@filehunt/shared-ts/types";
 
 import { useState, useRef } from 'react';
 

@@ -23,7 +23,7 @@ import { BranchesLeftSidebar } from './components/BranchesLeftSidebar';
 import { BranchesRightSidebar } from './components/BranchesRightSidebar';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
-import { type Asset, type Collection, type Branch, type UploadFile, type SearchFilters } from '@shared-ts/types';
+import { type Asset, type Collection, type Branch, type UploadFile, type SearchFilters } from '@/shared';
 
 export interface TimelineCommit {
   id: string;

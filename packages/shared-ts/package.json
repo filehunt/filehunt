@@ -1,21 +1,31 @@
 {
   "name": "@filehunt/shared-ts",
   "version": "1.0.0",
-  "description": "Shared React components and utilities for Filehunt",
-  "main": "simple.ts",
-  "module": "simple.ts",
-  "types": "simple.ts",
+  "description": "Shared TypeScript utilities, types, and components for Filehunt",
+  "main": "index.ts",
+  "module": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types/index.ts",
+    "./utils": "./utils/index.ts",
+    "./hooks": "./hooks/index.ts",
+    "./ui": "./ui/index.ts",
+    "./lib": "./lib/index.ts"
+  },
   "files": [
     "dist",
-    "styles"
+    "types",
+    "utils",
+    "hooks",
+    "ui",
+    "lib",
+    "index.ts"
   ],
   "scripts": {
-    "build": "mkdir -p dist && cp -r components hooks lib utils types styles index.ts dist/",
-    "dev": "storybook dev -p 6006",
+    "build": "tsc",
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
     "test": "echo \"No tests configured yet\""
   },
   "keywords": [
@@ -75,23 +85,14 @@
     "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
-    "@storybook/addon-docs": "^8.4.7",
-    "@storybook/addon-essentials": "^8.4.7",
-    "@storybook/addon-onboarding": "^8.4.7",
-    "@storybook/react": "^8.4.7",
-    "@storybook/react-vite": "^8.4.7",
-    "@storybook/test": "^8.4.7",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "storybook": "^8.4.7",
     "typescript": "^5.0.2",
     "eslint": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
-    "vite": "^6.0.0",
-    "@vitejs/plugin-react": "^4.3.1",
     "@types/node": "^20.0.0"
   },
   "repository": {

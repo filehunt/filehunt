@@ -1,8 +1,8 @@
 import { Clock, TrendingUp, Star, Eye, Download } from 'lucide-react';
-import { type SearchFilters } from '@shared-ts/types';
-import { Card, CardContent, CardHeader, CardTitle } from '../shared'; //card';
-import { Badge } from '../shared'; //badge';
-import { Button } from '../shared'; //button';
+import { type SearchFilters } from "@filehunt/shared-ts/types";
+import { Card, CardContent, CardHeader, CardTitle } from '@filehunt/shared-ts/ui'; //card';
+import { Badge } from '@filehunt/shared-ts/ui'; //badge';
+import { Button } from '@filehunt/shared-ts/ui'; //button';
 
 interface SearchRightSidebarProps {
   searchResults: Asset[];
