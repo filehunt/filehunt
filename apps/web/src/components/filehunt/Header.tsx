@@ -26,9 +26,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/dropdown-menu';
 import { ThemeSelector } from '@/components/theme-selector';
+import { AppearancePopover } from './AppearancePopover';
 import { AppView } from './VerticalNav';
 
 export type ViewMode = 'grid' | 'list' | 'gallery';
+
+interface AppearanceSettings {
+  cardSize: 'S' | 'M' | 'L';
+  aspectRatio: 'masonry' | '16:9' | '4:3' | '1:1';
+  thumbnailScale: 'fit' | 'fill';
+  showCardInfo: boolean;
+}
 
 interface HeaderProps {
   onViewChange?: (view: AppView) => void;
@@ -39,6 +47,8 @@ interface HeaderProps {
   currentView?: AppView;
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
+  appearanceSettings?: AppearanceSettings;
+  onAppearanceSettingsChange?: (settings: AppearanceSettings) => void;
 }
 
 export function Header({
@@ -49,7 +59,9 @@ export function Header({
   onCreateBranch,
   currentView = 'main',
   viewMode = 'grid',
-  onViewModeChange
+  onViewModeChange,
+  appearanceSettings,
+  onAppearanceSettingsChange
 }: HeaderProps) {
   const [searchValue, setSearchValue] = useState('');
 
@@ -197,31 +209,41 @@ export function Header({
       <div className="flex items-center space-x-4">
         {/* View controls */}
         {shouldShowViewControls() && onViewModeChange && (
-          <div className="flex items-center space-x-2 bg-accent/30 rounded-md p-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleViewModeClick('grid')}
-              className={`h-7 w-7 p-0 ${getViewModeButtonClass('grid')}`}
-            >
-              <Grid3X3 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleViewModeClick('list')}
-              className={`h-7 w-7 p-0 ${getViewModeButtonClass('list')}`}
-            >
-              <List className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleViewModeClick('gallery')}
-              className={`h-7 w-7 p-0 ${getViewModeButtonClass('gallery')}`}
-            >
-              <GalleryVerticalEnd className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 bg-accent/30 rounded-md p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleViewModeClick('grid')}
+                className={`h-7 w-7 p-0 ${getViewModeButtonClass('grid')}`}
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleViewModeClick('list')}
+                className={`h-7 w-7 p-0 ${getViewModeButtonClass('list')}`}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleViewModeClick('gallery')}
+                className={`h-7 w-7 p-0 ${getViewModeButtonClass('gallery')}`}
+              >
+                <GalleryVerticalEnd className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            {/* Appearance Settings */}
+            {appearanceSettings && onAppearanceSettingsChange && (
+              <AppearancePopover
+                settings={appearanceSettings}
+                onSettingsChange={onAppearanceSettingsChange}
+              />
+            )}
           </div>
         )}
 

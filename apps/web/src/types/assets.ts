@@ -8,6 +8,28 @@ interface TimelineCommit {
   branch?: string;
 }
 
+export interface SearchFilters {
+  query?: string;
+  type?: string[];
+  tags?: string[];
+  folders?: string[];
+  status?: string[];
+  uploader?: string;
+  sortBy?: 'relevance' | 'date' | 'name' | 'size';
+  sortOrder?: 'asc' | 'desc';
+  dateRange?: {
+    from: Date;
+    to: Date;
+  };
+}
+
+export interface SavedSearch {
+  id: string;
+  name: string;
+  filters: SearchFilters;
+  createdAt: string;
+}
+
 export interface Asset {
   id: string;
   name: string;

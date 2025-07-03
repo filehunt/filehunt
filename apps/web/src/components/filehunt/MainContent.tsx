@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, LayoutGroup } from "framer-motion";
 import { ArrowUpDown, Filter, ChevronDown, Search } from "lucide-react";
 import { AssetCard } from "@/components/filehunt/AssetCard";
 import { Asset, mockAssets } from "@/types/assets";
@@ -217,37 +218,55 @@ export function MainContent({
       </div>
 
       {/* Asset Grid */}
-      <div
-        className={cn(
-          "p-4 flex-1 overflow-y-auto pb-20",
-          viewMode === "grid" 
-            ? "" 
-            : "flex flex-col space-y-2"
-        )}
-        style={{
-          columnCount: viewMode === "grid" 
-            ? appearanceSettings.cardSize === 'S' ? 6 : appearanceSettings.cardSize === 'L' ? 3 : 4
-            : undefined,
-          columnGap: viewMode === "grid" ? '16px' : undefined,
-          columnFill: 'balance',
-          columnWidth: viewMode === "grid" 
-            ? appearanceSettings.cardSize === 'S' ? '180px' : appearanceSettings.cardSize === 'L' ? '320px' : '240px'
-            : undefined
-        }}
-      >
-        {sortedAssets.map((asset) => (
-          <AssetCard
+      <LayoutGroup>
+        <motion.div
+          className={cn(
+            "p-4 flex-1 overflow-y-auto pb-20",
+            viewMode === "grid" 
+              ? "" 
+              : "flex flex-col space-y-2"
+          )}
+          style={{
+            columnCount: viewMode === "grid" 
+              ? appearanceSettings.cardSize === 'S' ? 6 : appearanceSettings.cardSize === 'L' ? 3 : 4
+              : undefined,
+            columnGap: viewMode === "grid" ? '16px' : undefined,
+            columnFill: 'balance',
+            columnWidth: viewMode === "grid" 
+              ? appearanceSettings.cardSize === 'S' ? '180px' : appearanceSettings.cardSize === 'L' ? '320px' : '240px'
+              : undefined
+          }}
+          layout
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        >
+        {sortedAssets.map((asset, index) => (
+          <motion.div 
             key={asset.id}
-            asset={asset}
-            isSelected={selectedAssets.some((a) => a.id === asset.id)}
-            onSelect={onAssetSelect}
-            onPreview={onAssetPreview}
-            onDetail={onAssetDetail}
-            viewMode={viewMode}
-            appearanceSettings={appearanceSettings}
-          />
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            whileHover={{ scale: 1.02 }}
+            transition={{ 
+              layout: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
+              opacity: { duration: 0.3, delay: index * 0.03 },
+              scale: { duration: 0.3, delay: index * 0.03 },
+              hover: { duration: 0.2 }
+            }}
+          >
+            <AssetCard
+              asset={asset}
+              isSelected={selectedAssets.some((a) => a.id === asset.id)}
+              onSelect={onAssetSelect}
+              onPreview={onAssetPreview}
+              onDetail={onAssetDetail}
+              viewMode={viewMode}
+              appearanceSettings={appearanceSettings}
+            />
+          </motion.div>
         ))}
-      </div>
+        </motion.div>
+      </LayoutGroup>
     </div>
   );
 }

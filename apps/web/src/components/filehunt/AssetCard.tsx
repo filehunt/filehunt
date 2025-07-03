@@ -29,6 +29,7 @@ interface AssetCardProps {
   onDetail?: (asset: Asset) => void;
   viewMode?: 'grid' | 'list';
   appearanceSettings?: AppearanceSettings;
+  searchMode?: boolean;
 }
 
 export function AssetCard({ 
@@ -38,6 +39,7 @@ export function AssetCard({
   onPreview,
   onDetail,
   viewMode = 'grid',
+  searchMode = false,
   appearanceSettings = {
     cardSize: 'L',
     aspectRatio: 'masonry',
@@ -46,6 +48,7 @@ export function AssetCard({
   }
 }: AssetCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const FileTypeIcon = () => {
     switch (asset.type) {
@@ -76,26 +79,42 @@ export function AssetCard({
   return (
     <div
       className={cn(
-        "relative rounded-lg bg-card text-card-foreground shadow-sm transition-all duration-200 cursor-pointer group mb-4 break-inside-avoid",
-        isSelected ? "shadow-primary/20 ring-2 ring-primary" : "",
-        isHovered && !isSelected ? "shadow-lg transform scale-[1.02]" : "",
+        "relative rounded-lg bg-card/20 transition-all duration-200 cursor-pointer group mb-4 break-inside-avoid",
+        isSelected ? "bg-blue-500/20 ring-1 ring-blue-500/50" : "",
+        isHovered && !isSelected ? "bg-card/30 transform scale-[1.02]" : "",
         viewMode === 'list' ? 'flex items-center p-2' : 'flex flex-col',
         appearanceSettings.cardSize === 'S' ? 'text-xs' : 
-        appearanceSettings.cardSize === 'L' ? 'text-base' : 'text-sm'
+        appearanceSettings.cardSize === 'L' ? 'text-base' : 'text-sm',
+        searchMode ? 'hover:bg-card/30' : ''
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={(e) => {
+        // Allow checkbox and other controls to work without triggering preview/selection
+        if (e.target instanceof HTMLInputElement || (e.target as HTMLElement).closest('button')) {
+          return;
+        }
+        // In search mode: single click selects/deselects
+        if (searchMode) {
+          onSelect(asset.id, !isSelected);
+        } else {
+          // In normal mode: single click triggers preview
+          if (onPreview) onPreview(asset);
+        }
+      }}
+      onDoubleClick={(e) => {
         // Allow checkbox and other controls to work without triggering detail view
         if (e.target instanceof HTMLInputElement || (e.target as HTMLElement).closest('button')) {
           return;
         }
+        // Double click triggers detail view
         if (onDetail) onDetail(asset);
       }}
     >
       {/* Thumbnail */}
       <div className={cn(
-        "relative bg-muted overflow-hidden rounded-t-lg",
+        "relative bg-muted/30 overflow-hidden",
+        searchMode ? 'rounded-lg' : 'rounded-t-lg',
         viewMode === 'list' && 'rounded-md w-24 h-16 flex-shrink-0',
         // Apply aspect ratio container only in grid mode when NOT masonry
         viewMode === 'grid' && appearanceSettings.aspectRatio !== 'masonry' && [
@@ -104,39 +123,60 @@ export function AssetCard({
           appearanceSettings.aspectRatio === '16:9' && 'aspect-video'
         ].filter(Boolean).join(' ')
       )}>
-        <img 
-          src={asset.thumbnailUrl} 
-          alt={asset.altText || asset.name} 
-          className={cn(
-            "w-full transition-transform duration-300 group-hover:scale-110",
-            // In grid mode: h-auto for masonry OR h-full when forcing aspect ratio
+        {!imageError ? (
+          <img 
+            src={asset.thumbnailUrl} 
+            alt={asset.altText || asset.name} 
+            onError={() => setImageError(true)}
+            className={cn(
+              "w-full transition-transform duration-300 group-hover:scale-110",
+              // In grid mode: h-auto for masonry OR h-full when forcing aspect ratio
+              viewMode === 'grid' ? (
+                appearanceSettings.aspectRatio === 'masonry' ? 'h-auto' : 'h-full'
+              ) : 'h-full',
+              // Apply thumbnail scale
+              getImageStyles()
+            )} 
+          />
+        ) : (
+          <div className={cn(
+            "w-full flex items-center justify-center bg-muted/30",
             viewMode === 'grid' ? (
-              appearanceSettings.aspectRatio === 'masonry' ? 'h-auto' : 'h-full'
-            ) : 'h-full',
-            // Apply thumbnail scale
-            getImageStyles()
-          )} 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              appearanceSettings.aspectRatio === 'masonry' ? 'h-48' : 'h-full'
+            ) : 'h-full'
+          )}>
+            <div className="flex flex-col items-center text-muted-foreground">
+              <FileTypeIcon />
+              <span className="text-xs mt-1">{asset.fileExtension}</span>
+            </div>
+          </div>
+        )}
+        
+        {!searchMode && <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />}
         
         {/* Overlay with actions - shown on hover */}
-        <div className={cn(
-          "absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-200",
-          isHovered && "opacity-100"
-        )} />
+        {!searchMode && (
+          <div className={cn(
+            "absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-200",
+            isHovered && "opacity-100"
+          )} />
+        )}
         
         {/* Checkbox - always visible in top-left, larger on hover */}
         <div className={cn(
           "absolute top-2 left-2 z-10 transition-transform duration-200",
-          isHovered && "scale-125"
+          (isHovered || searchMode) && "scale-125"
         )}>
           <Checkbox 
             checked={isSelected} 
             onCheckedChange={(checked) => onSelect(asset.id, !!checked)}
             className={cn(
-              "shadow-lg transition-all duration-200",
+              "transition-all duration-200",
+              searchMode ? "shadow-md" : "shadow-lg",
               isSelected
-                ? "bg-primary border-primary text-primary-foreground"
+                ? "bg-blue-600 border-blue-600 text-white"
+                : searchMode
+                ? "bg-background/90 border border-white/60 hover:border-white hover:bg-white/10"
                 : "bg-background/95 border-2 border-white/80 hover:border-white hover:bg-white/10"
             )}
           />
@@ -149,14 +189,25 @@ export function AssetCard({
           )}
         </div>
 
-        {/* Title on hover */}
-        <div className={cn(
-          "absolute inset-0 flex flex-col items-center justify-center p-4 bg-black/60 transition-opacity duration-300",
-          isHovered ? "opacity-100" : "opacity-0"
-        )}>
-          <div className="text-white font-bold text-lg text-center mb-1 truncate max-w-full">{asset.name}</div>
-          <div className="text-white/80 text-sm">{formatFileSize(asset.size)} • {asset.fileExtension}</div>
-        </div>
+        {/* Title on hover - only in normal mode */}
+        {!searchMode && (
+          <div className={cn(
+            "absolute inset-0 flex flex-col items-center justify-center p-4 bg-black/60 transition-opacity duration-300",
+            isHovered ? "opacity-100" : "opacity-0"
+          )}>
+            <div className="text-white font-bold text-lg text-center mb-1 truncate max-w-full">{asset.name}</div>
+            <div className="text-white/80 text-sm">{formatFileSize(asset.size)} • {asset.fileExtension}</div>
+          </div>
+        )}
+        
+        {/* Selection indicator for search mode */}
+        {searchMode && isSelected && (
+          <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+            <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+              Selected
+            </div>
+          </div>
+        )}
 
       </div>
 
@@ -217,15 +268,27 @@ export function AssetCard({
           </div>
 
           <div className="flex items-center">
-            <img 
-              src={asset.uploadedBy.avatar} 
-              alt={asset.uploadedBy.name} 
-              className={cn(
-                "rounded-full",
-                appearanceSettings.cardSize === 'S' ? 'w-4 h-4' : 
-                appearanceSettings.cardSize === 'L' ? 'w-6 h-6' : 'w-5 h-5'
-              )} 
-            />
+            <div className={cn(
+              "rounded-full bg-muted flex items-center justify-center text-muted-foreground font-medium",
+              appearanceSettings.cardSize === 'S' ? 'w-4 h-4 text-[8px]' : 
+              appearanceSettings.cardSize === 'L' ? 'w-6 h-6 text-xs' : 'w-5 h-5 text-[10px]'
+            )}>
+              {asset.uploadedBy.avatar ? (
+                <img 
+                  src={asset.uploadedBy.avatar} 
+                  alt={asset.uploadedBy.name} 
+                  className="w-full h-full rounded-full object-cover" 
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling!.setAttribute('style', 'display: block');
+                  }}
+                />
+              ) : null}
+              <span className={asset.uploadedBy.avatar ? 'hidden' : 'block'}>
+                {asset.uploadedBy.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+              </span>
+            </div>
           </div>
         </div>
         </div>

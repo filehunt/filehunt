@@ -14,7 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/button';
 
-export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'branches' | 'favorites' | 'settings' | 'help' | 'asset-detail' | 'activities';
+export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'branches' | 'favorites' | 'settings' | 'help' | 'activities' | 'asset-detail';
 
 interface VerticalNavProps {
   currentView: AppView;

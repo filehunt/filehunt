@@ -9,7 +9,12 @@ import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
 import { StatusBar } from './StatusBar';
 import { MouseSpotlight } from './MouseSpotlight';
-import { Asset, mockAssets } from '@/types/assets';
+import { AssetDetail } from './AssetDetail';
+import { AssetDetailSidebar } from './AssetDetailSidebar';
+import { Asset, SearchFilters, SavedSearch, mockAssets } from '@/types/assets';
+import { SearchScreen } from './SearchScreen';
+import { SearchLeftSidebar } from './SearchLeftSidebar';
+import { SearchRightSidebar } from './SearchRightSidebar';
 
 export default function FilehuntApp() {
   // Core app state
@@ -17,7 +22,22 @@ export default function FilehuntApp() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
+  const [detailAsset, setDetailAsset] = useState<Asset | null>(null);
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
+  const [previousView, setPreviousView] = useState<AppView>('main');
+  
+  // Search state
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({});
+  const [searchResults, setSearchResults] = useState<Asset[]>([]);
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  
+  // Appearance settings
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    cardSize: 'M' as 'S' | 'M' | 'L',
+    aspectRatio: 'masonry' as 'masonry' | '16:9' | '4:3' | '1:1',
+    thumbnailScale: 'fill' as 'fit' | 'fill',
+    showCardInfo: true
+  });
 
   // Navigation handlers
   const handleViewChange = (view: AppView) => {
@@ -31,15 +51,17 @@ export default function FilehuntApp() {
   };
 
   // Asset selection handlers
-  const handleAssetSelect = (assetId: string, isSelected: boolean) => {
+  const handleAssetSelect = (asset: Asset, isSelected: boolean) => {
     if (isSelected) {
-      // Find the asset and add it to selection
-      const asset = mockAssets.find(a => a.id === assetId);
-      if (asset) {
-        setSelectedAssets(prev => [...prev, asset]);
-      }
+      // Add asset to selection if not already selected
+      setSelectedAssets(prev => {
+        if (prev.some(a => a.id === asset.id)) {
+          return prev; // Already selected
+        }
+        return [...prev, asset];
+      });
     } else {
-      setSelectedAssets(prev => prev.filter(a => a.id !== assetId));
+      setSelectedAssets(prev => prev.filter(a => a.id !== asset.id));
     }
   };
 
@@ -53,8 +75,15 @@ export default function FilehuntApp() {
   };
 
   const handleAssetDetail = (asset: Asset) => {
-    // When an asset is clicked, show it in the preview
-    setPreviewAsset(asset);
+    // When an asset is double-clicked, show it in detail view
+    setPreviousView(currentView);
+    setDetailAsset(asset);
+    setCurrentView('asset-detail');
+  };
+
+  const handleBackFromDetail = () => {
+    setDetailAsset(null);
+    setCurrentView(previousView);
   };
 
   // Tag and folder management
@@ -71,6 +100,11 @@ export default function FilehuntApp() {
     if (previewAsset && previewAsset.id === assetId) {
       setPreviewAsset({ ...previewAsset, tags: [...previewAsset.tags, tag] });
     }
+    
+    // Update detail asset if it's the same
+    if (detailAsset && detailAsset.id === assetId) {
+      setDetailAsset({ ...detailAsset, tags: [...detailAsset.tags, tag] });
+    }
   };
 
   const handleTagRemove = (assetId: string, tag: string) => {
@@ -85,6 +119,11 @@ export default function FilehuntApp() {
     // Update preview asset if it's the same
     if (previewAsset && previewAsset.id === assetId) {
       setPreviewAsset({ ...previewAsset, tags: previewAsset.tags.filter(t => t !== tag) });
+    }
+    
+    // Update detail asset if it's the same
+    if (detailAsset && detailAsset.id === assetId) {
+      setDetailAsset({ ...detailAsset, tags: detailAsset.tags.filter(t => t !== tag) });
     }
   };
 
@@ -101,6 +140,11 @@ export default function FilehuntApp() {
     if (previewAsset && previewAsset.id === assetId) {
       setPreviewAsset({ ...previewAsset, folders: [...previewAsset.folders, folder] });
     }
+    
+    // Update detail asset if it's the same
+    if (detailAsset && detailAsset.id === assetId) {
+      setDetailAsset({ ...detailAsset, folders: [...detailAsset.folders, folder] });
+    }
   };
 
   const handleFolderRemove = (assetId: string, folder: string) => {
@@ -115,6 +159,11 @@ export default function FilehuntApp() {
     // Update preview asset if it's the same
     if (previewAsset && previewAsset.id === assetId) {
       setPreviewAsset({ ...previewAsset, folders: previewAsset.folders.filter(f => f !== folder) });
+    }
+    
+    // Update detail asset if it's the same
+    if (detailAsset && detailAsset.id === assetId) {
+      setDetailAsset({ ...detailAsset, folders: detailAsset.folders.filter(f => f !== folder) });
     }
   };
 
@@ -170,6 +219,22 @@ export default function FilehuntApp() {
     console.log('Add tags to:', assets.map(a => a.name));
   };
 
+  // Status update handler for asset detail
+  const handleStatusUpdate = (assetId: string, status: Asset['status']) => {
+    setAssets(prevAssets => 
+      prevAssets.map(asset => 
+        asset.id === assetId 
+          ? { ...asset, status }
+          : asset
+      )
+    );
+    
+    // Update detail asset if it's the same
+    if (detailAsset && detailAsset.id === assetId) {
+      setDetailAsset({ ...detailAsset, status });
+    }
+  };
+
   // Determine which components to show based on current view
   const shouldShowHeader = () => {
     return ['main', 'search', 'collections', 'branches', 'upload', 'asset-detail'].includes(currentView);
@@ -193,17 +258,37 @@ export default function FilehuntApp() {
             onAssetPreview={handleAssetPreview}
             onAssetDetail={handleAssetDetail}
             viewMode={viewMode}
+            appearanceSettings={appearanceSettings}
+          />
+        );
+
+      case 'asset-detail':
+        return (
+          <AssetDetail
+            asset={detailAsset}
+            onBack={handleBackFromDetail}
+            onTagAdd={handleTagAdd}
+            onTagRemove={handleTagRemove}
+            onFolderAdd={handleFolderAdd}
+            onFolderRemove={handleFolderRemove}
+            onStatusUpdate={handleStatusUpdate}
           />
         );
 
       case 'search':
         return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Search View</h2>
-              <p className="text-muted-foreground">Search functionality will be implemented in Iteration 4</p>
-            </div>
-          </div>
+          <SearchScreen
+            filters={searchFilters}
+            onFiltersChange={setSearchFilters}
+            searchResults={searchResults}
+            onSearchResultsChange={setSearchResults}
+            onAssetSelect={handleAssetSelect}
+            onAssetPreview={handleAssetPreview}
+            onAssetDetail={handleAssetDetail}
+            viewMode={viewMode}
+            selectedAssets={selectedAssets}
+            appearanceSettings={appearanceSettings}
+          />
         );
 
       case 'upload':
@@ -310,19 +395,31 @@ export default function FilehuntApp() {
             currentView={currentView}
             viewMode={shouldShowViewControls() ? viewMode : undefined}
             onViewModeChange={shouldShowViewControls() ? handleViewModeChange : undefined}
+            appearanceSettings={shouldShowViewControls() ? appearanceSettings : undefined}
+            onAppearanceSettingsChange={shouldShowViewControls() ? setAppearanceSettings : undefined}
           />
         )}
 
         <div className="flex flex-1 overflow-hidden">
           {/* Left Sidebar */}
-          {currentView === 'main' && (
+          {(currentView === 'main' || currentView === 'asset-detail') && (
             <LeftSidebar />
+          )}
+          
+          {/* Search Left Sidebar */}
+          {currentView === 'search' && (
+            <SearchLeftSidebar
+              filters={searchFilters}
+              onFiltersChange={setSearchFilters}
+              savedSearches={savedSearches}
+              onSavedSearchesChange={setSavedSearches}
+            />
           )}
 
           {/* Main Content */}
           {renderMainContent()}
 
-          {/* Right Sidebar - Always present in main view */}
+          {/* Right Sidebar - Different for main and asset-detail views */}
           {currentView === 'main' && (
             <RightSidebar
               previewAsset={previewAsset}
@@ -331,6 +428,24 @@ export default function FilehuntApp() {
               onTagRemove={handleTagRemove}
               onFolderAdd={handleFolderAdd}
               onFolderRemove={handleFolderRemove}
+            />
+          )}
+          
+          {currentView === 'asset-detail' && (
+            <div className="pr-4">
+              <AssetDetailSidebar
+                asset={detailAsset}
+                onCommentAdd={(assetId, comment) => console.log('Comment added:', comment)}
+                onStatusUpdate={handleStatusUpdate}
+              />
+            </div>
+          )}
+          
+          {/* Search Right Sidebar */}
+          {currentView === 'search' && (
+            <SearchRightSidebar
+              searchResults={searchResults}
+              filters={searchFilters}
             />
           )}
         </div>
