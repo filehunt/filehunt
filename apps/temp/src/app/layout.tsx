@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/lib/theme-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FileHunt Demo",
-  description: "Application de démonstration construite avec Next.js, TypeScript, Tailwind CSS et Radix UI",
+  title: "Filehunt - Digital Asset Management",
+  description: "A comprehensive Digital Asset Management platform built with React and TypeScript",
 };
 
 export default function RootLayout({
@@ -24,13 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
