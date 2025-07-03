@@ -7,16 +7,20 @@ import { Sparkles, Hash, Loader2, Check, Plus } from 'lucide-react';
 import { Asset } from '@/types/assets';
 
 interface TagSuggestionPopoverProps {
-  asset: Asset;
+  asset?: Asset;
   onTagAdd: (tag: string) => void;
+  existingTags?: string[];
   trigger: React.ReactNode;
-  existingTags: string[];
+  assetType?: 'image' | 'video' | 'audio' | 'document';
 }
 
-export function TagSuggestionPopover({ asset, onTagAdd, trigger, existingTags }: TagSuggestionPopoverProps) {
+export function TagSuggestionPopover({ asset, onTagAdd, existingTags = [], trigger, assetType }: TagSuggestionPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [isAutoTagging, setIsAutoTagging] = useState(false);
+  
+  // Define currentType at component level
+  const currentType = asset?.type || assetType || 'document';
 
   // Memoize suggestions to prevent infinite re-renders
   const suggestions = useMemo(() => {
@@ -34,21 +38,23 @@ export function TagSuggestionPopover({ asset, onTagAdd, trigger, existingTags }:
       'high-quality', 'professional', 'creative', 'artistic', 'commercial'
     ];
 
-    const typeSuggestions = baseSuggestions[asset.type] || [];
+    const typeSuggestions = baseSuggestions[currentType] || [];
 
     // Add suggestions based on asset name
     const nameSuggestions: string[] = [];
-    const name = asset.name.toLowerCase();
-    if (name.includes('logo')) nameSuggestions.push('logo', 'branding', 'identity');
-    if (name.includes('hero')) nameSuggestions.push('hero', 'banner', 'featured');
-    if (name.includes('social')) nameSuggestions.push('social-media', 'social', 'platform');
-    if (name.includes('campaign')) nameSuggestions.push('campaign', 'marketing', 'promotional');
-    if (name.includes('product')) nameSuggestions.push('product', 'catalog', 'showcase');
+    if (asset?.name) {
+      const name = asset.name.toLowerCase();
+      if (name.includes('logo')) nameSuggestions.push('logo', 'branding', 'identity');
+      if (name.includes('hero')) nameSuggestions.push('hero', 'banner', 'featured');
+      if (name.includes('social')) nameSuggestions.push('social-media', 'social', 'platform');
+      if (name.includes('campaign')) nameSuggestions.push('campaign', 'marketing', 'promotional');
+      if (name.includes('product')) nameSuggestions.push('product', 'catalog', 'showcase');
+    }
 
     return [...new Set([...typeSuggestions, ...nameSuggestions, ...contentSuggestions])]
       .filter(tag => !existingTags.includes(tag))
       .slice(0, 12);
-  }, [asset.type, asset.name, existingTags]);
+  }, [currentType, asset?.name, existingTags]);
 
   // Memoize filtered suggestions to prevent unnecessary re-renders
   const filteredSuggestions = useMemo(() => {
@@ -87,7 +93,7 @@ export function TagSuggestionPopover({ asset, onTagAdd, trigger, existingTags }:
       'ai-generated',
       'high-resolution',
       'professional',
-      asset.type === 'image' ? 'photography' : `${asset.type}-content`,
+      currentType === 'image' ? 'photography' : `${currentType}-content`,
       'ready-to-use'
     ].filter(tag => !existingTags.includes(tag));
 
@@ -158,7 +164,7 @@ export function TagSuggestionPopover({ asset, onTagAdd, trigger, existingTags }:
           {/* Suggested Tags */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">Suggested for this {asset.type}</span>
+              <span className="text-xs text-gray-400">Suggested for this {currentType}</span>
               <span className="text-xs text-gray-500">{filteredSuggestions.length} suggestions</span>
             </div>
 

@@ -15,6 +15,7 @@ import { Asset, SearchFilters, SavedSearch, mockAssets } from '@/types/assets';
 import { SearchScreen } from './SearchScreen';
 import { SearchLeftSidebar } from './SearchLeftSidebar';
 import { SearchRightSidebar } from './SearchRightSidebar';
+import { UploadScreen } from './UploadScreen';
 
 export default function FilehuntApp() {
   // Core app state
@@ -293,12 +294,48 @@ export default function FilehuntApp() {
 
       case 'upload':
         return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Upload View</h2>
-              <p className="text-muted-foreground">Upload interface will be implemented in Iteration 3</p>
-            </div>
-          </div>
+          <UploadScreen
+            onUpload={(uploadedFiles) => {
+              // Handle uploaded files - convert to Asset format and add to assets
+              const newAssets: Asset[] = uploadedFiles.map(file => ({
+                id: file.id,
+                name: file.file.name,
+                type: file.file.type.split('/')[0] as 'image' | 'video' | 'audio' | 'document',
+                size: file.file.size,
+                url: file.preview || '/placeholder-file.png',
+                thumbnailUrl: file.preview || '/placeholder-file.png',
+                tags: file.tags,
+                folders: file.folders,
+                status: 'approved' as const,
+                createdAt: new Date().toISOString(),
+                uploadedBy: {
+                  id: 'current-user',
+                  name: 'Current User',
+                  avatar: '/avatar-placeholder.png'
+                },
+                metadata: {
+                  width: 1920,
+                  height: 1080,
+                  format: file.file.type.split('/')[1] || 'unknown',
+                  colorProfile: 'sRGB',
+                  camera: 'Unknown',
+                  lens: 'Unknown',
+                  settings: 'Unknown'
+                },
+                description: '',
+                version: '1.0',
+                isPrivate: false
+              }));
+              
+              // Add new assets to the main assets list
+              setAssets(prev => [...prev, ...newAssets]);
+              
+              // Navigate back to main view to see uploaded files
+              setCurrentView('main');
+              console.log('Uploaded files successfully:', newAssets.map(a => a.name));
+            }}
+            onBack={() => setCurrentView('main')}
+          />
         );
 
       case 'collections':
@@ -374,7 +411,7 @@ export default function FilehuntApp() {
   };
 
   return (
-    <div className="h-screen eagle-bg text-foreground flex relative">
+    <div className={`h-screen ${currentView === 'upload' ? 'bg-background' : 'eagle-bg'} text-foreground flex relative`}>
       {/* Mouse Following Spotlight Background Effect */}
       <MouseSpotlight />
       
