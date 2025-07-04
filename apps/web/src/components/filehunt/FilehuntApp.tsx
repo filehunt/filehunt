@@ -11,11 +11,13 @@ import { StatusBar } from './StatusBar';
 import { MouseSpotlight } from './MouseSpotlight';
 import { AssetDetail } from './AssetDetail';
 import { AssetDetailSidebar } from './AssetDetailSidebar';
-import { Asset, SearchFilters, SavedSearch, mockAssets } from '@/types/assets';
+import { Asset, Collection, SearchFilters, SavedSearch, mockAssets } from '@/types/assets';
 import { SearchScreen } from './SearchScreen';
 import { SearchLeftSidebar } from './SearchLeftSidebar';
 import { SearchRightSidebar } from './SearchRightSidebar';
 import { UploadScreen } from './UploadScreen';
+import { CollectionsScreen } from '@/components/collections/CollectionsScreen';
+import { CollectionStatusBar } from '@/components/collections/CollectionStatusBar';
 
 export default function FilehuntApp() {
   // Core app state
@@ -26,6 +28,9 @@ export default function FilehuntApp() {
   const [detailAsset, setDetailAsset] = useState<Asset | null>(null);
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
   const [previousView, setPreviousView] = useState<AppView>('main');
+  
+  // Collections state
+  const [selectedCollections, setSelectedCollections] = useState<Collection[]>([]);
   
   // Search state
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({});
@@ -220,6 +225,32 @@ export default function FilehuntApp() {
     console.log('Add tags to:', assets.map(a => a.name));
   };
 
+  // Collection action handlers
+  const handleCollectionShare = (collections: Collection[]) => {
+    console.log('Share collections:', collections.map(c => c.name));
+  };
+
+  const handleCollectionDownload = (collections: Collection[]) => {
+    console.log('Download collections:', collections.map(c => c.name));
+  };
+
+  const handleCollectionDelete = (collections: Collection[]) => {
+    console.log('Delete collections:', collections.map(c => c.name));
+    setSelectedCollections([]);
+  };
+
+  const handleCollectionEdit = (collections: Collection[]) => {
+    console.log('Edit collections:', collections.map(c => c.name));
+  };
+
+  const handleCollectionPreview = (collections: Collection[]) => {
+    console.log('Preview collections:', collections.map(c => c.name));
+  };
+
+  const handleClearCollectionSelection = () => {
+    setSelectedCollections([]);
+  };
+
   // Status update handler for asset detail
   const handleStatusUpdate = (assetId: string, status: Asset['status']) => {
     setAssets(prevAssets => 
@@ -246,6 +277,10 @@ export default function FilehuntApp() {
   };
 
   const shouldShowViewControls = () => {
+    return ['main', 'search', 'collections'].includes(currentView);
+  };
+
+  const shouldShowAppearanceControls = () => {
     return ['main', 'search', 'collections'].includes(currentView);
   };
 
@@ -340,12 +375,20 @@ export default function FilehuntApp() {
 
       case 'collections':
         return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Collections View</h2>
-              <p className="text-muted-foreground">Collections management will be implemented in Iteration 5</p>
-            </div>
-          </div>
+          <CollectionsScreen
+            onNavigateToAssets={(collectionId) => {
+              // Navigate to main view with the selected collection pre-filtered
+              console.log('Navigate to assets with collection:', collectionId);
+              setCurrentView('main');
+            }}
+            viewMode={viewMode}
+            appearanceSettings={appearanceSettings}
+            selectedCollections={selectedCollections}
+            onSelectedCollectionsChange={setSelectedCollections}
+            onCollectionCreated={(newCollection) => {
+              console.log('New collection created:', newCollection.name);
+            }}
+          />
         );
 
       case 'branches':
@@ -411,7 +454,7 @@ export default function FilehuntApp() {
   };
 
   return (
-    <div className={`h-screen ${currentView === 'upload' ? 'bg-background' : 'eagle-bg'} text-foreground flex relative`}>
+    <div className={`h-screen eagle-bg text-foreground flex relative`}>
       {/* Mouse Following Spotlight Background Effect */}
       <MouseSpotlight />
       
@@ -432,8 +475,8 @@ export default function FilehuntApp() {
             currentView={currentView}
             viewMode={shouldShowViewControls() ? viewMode : undefined}
             onViewModeChange={shouldShowViewControls() ? handleViewModeChange : undefined}
-            appearanceSettings={shouldShowViewControls() ? appearanceSettings : undefined}
-            onAppearanceSettingsChange={shouldShowViewControls() ? setAppearanceSettings : undefined}
+            appearanceSettings={shouldShowAppearanceControls() && currentView !== 'collections' ? appearanceSettings : undefined}
+            onAppearanceSettingsChange={shouldShowAppearanceControls() && currentView !== 'collections' ? setAppearanceSettings : undefined}
           />
         )}
 
@@ -502,16 +545,31 @@ export default function FilehuntApp() {
       </div>
 
       {/* Status Bar - Fixed at bottom when assets are selected */}
-      <StatusBar
-        selectedAssets={selectedAssets}
-        onClearSelection={handleClearSelection}
-        onDownload={handleDownload}
-        onShare={handleShare}
-        onDelete={handleDelete}
-        onArchive={handleArchive}
-        onAddToFolder={handleAddToFolder}
-        onAddTags={handleAddTags}
-      />
+      {currentView !== 'collections' && (
+        <StatusBar
+          selectedAssets={selectedAssets}
+          onClearSelection={handleClearSelection}
+          onDownload={handleDownload}
+          onShare={handleShare}
+          onDelete={handleDelete}
+          onArchive={handleArchive}
+          onAddToFolder={handleAddToFolder}
+          onAddTags={handleAddTags}
+        />
+      )}
+      
+      {/* Collection Status Bar - Only for collections view */}
+      {currentView === 'collections' && (
+        <CollectionStatusBar
+          selectedCollections={selectedCollections}
+          onClearSelection={handleClearCollectionSelection}
+          onShare={handleCollectionShare}
+          onDownload={handleCollectionDownload}
+          onDelete={handleCollectionDelete}
+          onEdit={handleCollectionEdit}
+          onPreview={handleCollectionPreview}
+        />
+      )}
     </div>
   );
 }

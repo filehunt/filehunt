@@ -58,7 +58,7 @@ export function VerticalNav({ currentView, onViewChange }: VerticalNavProps) {
         </Button>
 
         {/* Tooltip */}
-        <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+        <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[99999]">
           {item.label}
           <div className="absolute left-[-4px] top-1/2 transform -translate-y-1/2 w-2 h-2 bg-popover rotate-45" />
         </div>
@@ -67,7 +67,7 @@ export function VerticalNav({ currentView, onViewChange }: VerticalNavProps) {
   };
 
   return (
-    <div className="w-14 flex flex-col justify-between pt-3 pb-4 flex-shrink-0" style={{ backgroundColor: 'transparent' }}>
+    <div className="w-14 flex flex-col justify-between pt-3 pb-4 flex-shrink-0 relative z-[200]" style={{ backgroundColor: 'transparent' }}>
       {/* Main Navigation Items */}
       <div className="flex flex-col space-y-2 items-center">
         {navItems.map((item) => (

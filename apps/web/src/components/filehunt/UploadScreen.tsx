@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, Image, Video, Music, FileText, ArrowLeft, GitCommit, Check, AlertCircle, Tag, Folder, Plus, GitBranch, FolderOpen, Settings, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
@@ -192,9 +193,19 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
   const updateFiles = uploadFiles.filter(f => f.action === 'update').length;
 
   return (
-    <div className="flex flex-1 text-foreground overflow-hidden animate-in fade-in duration-300">
+    <motion.div 
+      className="flex flex-1 text-foreground overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
       {/* Left Sidebar - Project Collections */}
-      <div className="w-80 flex flex-col">
+      <motion.div 
+        className="w-80 flex flex-col"
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+      >
         <div className="p-4">
           <h2 className="text-white font-semibold text-sm mb-4">Projects & Branches</h2>
 
@@ -458,12 +469,22 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
+      <motion.div 
+        className="flex-1 overflow-y-auto"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+      >
         <div className="p-6">
-          <div className="max-w-4xl mx-auto space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+          <motion.div 
+            className="max-w-4xl mx-auto space-y-6"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+          >
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -535,17 +556,32 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
           </div>
 
           {/* Staged Files */}
-          {uploadFiles.length > 0 && (
-            <div>
-              <div className="p-4 pb-2">
-                <h3 className="flex items-center gap-2 text-lg font-semibold">
-                  <GitCommit className="w-5 h-5" />
-                  Staged Changes ({uploadFiles.length})
-                </h3>
-              </div>
-              <div className="px-4 pb-4 space-y-4">
-                {uploadFiles.map((uploadFile) => (
-                  <div key={uploadFile.id} className="flex items-center space-x-4 p-4 rounded-lg bg-muted/30">
+          <AnimatePresence>
+            {uploadFiles.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <div className="p-4 pb-2">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold">
+                    <GitCommit className="w-5 h-5" />
+                    Staged Changes ({uploadFiles.length})
+                  </h3>
+                </div>
+                <div className="px-4 pb-4 space-y-4">
+                  <AnimatePresence>
+                    {uploadFiles.map((uploadFile, index) => (
+                      <motion.div 
+                        key={uploadFile.id} 
+                        className="flex items-center space-x-4 p-4 rounded-lg bg-muted/30"
+                        initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        layout
+                      >
                     {/* Status Indicator */}
                     <div className={`w-3 h-3 rounded-full ${
                       uploadFile.action === 'add' ? 'bg-green-500' : 'bg-orange-500'
@@ -668,13 +704,13 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-
-
-              </div>
-            </div>
-          )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Help Text */}
           {uploadFiles.length === 0 && (
@@ -704,12 +740,17 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
               </div>
             </div>
           )}
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Right Sidebar */}
-      <div className="w-80 flex flex-col">
+      <motion.div 
+        className="w-80 flex flex-col"
+        initial={{ x: 100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+      >
         {/* Header */}
         <div className="p-4">
           <h2 className="text-white font-semibold text-sm">Upload Information</h2>
@@ -797,8 +838,15 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
           )}
 
           {/* Commit Section */}
-          {uploadFiles.length > 0 && (
-            <div className="space-y-3 pt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg animate-in fade-in duration-300">
+          <AnimatePresence>
+            {uploadFiles.length > 0 && (
+              <motion.div 
+                className="space-y-3 pt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg"
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
               <h3 className="text-primary font-semibold text-sm flex items-center gap-2">
                 <GitCommit className="w-4 h-4 animate-pulse" />
                 Ready to Commit
@@ -846,8 +894,9 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
                   )}
                 </Button>
               </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Quick Tips */}
           <div className="space-y-3 pt-4">
@@ -868,8 +917,8 @@ export function UploadScreen({ onUpload, onBack }: UploadScreenProps) {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-    </div>
+    </motion.div>
   );
 }
