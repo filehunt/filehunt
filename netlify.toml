@@ -1,0 +1,14 @@
+[build]
+  publish = "apps/web/out"
+  command = "npx turbo build --filter=filehunt-web"
+  base = "/"
+
+# Variables d'environnement pour le build
+[build.environment]
+  NODE_VERSION = "18"
+
+# Redirection pour SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,14 +1,14 @@
-// Export all UI components (React-specific)
-export * from "./ui";
+/**
+ * @filehunt/shared-ts
+ * Shared TypeScript utilities for Filehunt
+ */
 
-// Export hooks (React-specific)
-export * from "./hooks";
+export function helloWorld(): string {
+  return "Hello World from shared-ts!";
+}
 
-// Export utilities (generic)
-export * from "./utils";
+export function greet(name: string): string {
+  return `Hello ${name} from shared-ts!`;
+}
 
-// Export types (generic)
-export * from "./types";
-
-// Export lib functions (generic configuration)
-export * from "./lib";
+export const VERSION = "1.0.0";
