@@ -9,13 +9,14 @@ import {
   Tag,
   Activity,
   Star,
+  Users,
   Settings,
   HelpCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/button';
 
-export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'approvals' | 'releases' | 'activity' | 'favorites' | 'settings' | 'help' | 'asset-detail';
+export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'approvals' | 'releases' | 'activity' | 'favorites' | 'users' | 'settings' | 'help' | 'asset-detail';
 
 interface VerticalNavProps {
   currentView: AppView;
@@ -35,6 +36,7 @@ export function VerticalNav({ currentView, onViewChange }: VerticalNavProps) {
   ];
 
   const bottomNavItems = [
+    { id: 'users' as AppView, icon: Users, label: 'Users' },
     { id: 'settings' as AppView, icon: Settings, label: 'Settings' },
     { id: 'help' as AppView, icon: HelpCircle, label: 'Help & Support' },
   ];

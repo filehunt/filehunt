@@ -22,6 +22,8 @@ import { BranchesScreen } from '@/components/branches/BranchesScreen';
 import { ApprovalsScreen } from '@/components/approvals/ApprovalsScreen';
 import { ReleasesScreen } from '@/components/releases/ReleasesScreen';
 import { ActivitiesScreen } from '@/components/activities/ActivitiesScreen';
+import { SettingsScreen } from '@/components/settings/SettingsScreen';
+import { UsersScreen } from '@/components/users/UsersScreen';
 import { mockBranches } from '@/data/branches';
 
 export default function FilehuntApp() {
@@ -306,7 +308,7 @@ export default function FilehuntApp() {
 
   // Determine which components to show based on current view
   const shouldShowHeader = () => {
-    return ['main', 'search', 'upload', 'collections', 'branches', 'approvals', 'releases', 'activity', 'favorites', 'settings', 'help', 'asset-detail'].includes(currentView);
+    return ['main', 'search', 'upload', 'collections', 'branches', 'approvals', 'releases', 'activity', 'favorites', 'users', 'settings', 'help', 'asset-detail'].includes(currentView);
   };
 
   const shouldShowFooter = () => {
@@ -461,12 +463,12 @@ export default function FilehuntApp() {
 
       case 'settings':
         return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Settings View</h2>
-              <p className="text-muted-foreground">Settings panel will be implemented in Iteration 7</p>
-            </div>
-          </div>
+          <SettingsScreen />
+        );
+
+      case 'users':
+        return (
+          <UsersScreen />
         );
 
       case 'help':
