@@ -2,22 +2,14 @@
 
 import { useState } from 'react';
 import {
-  Folder, ChevronRight, ChevronDown, Plus, SquareDashedMousePointer, Play,
-  Mic, MessageCircle, GitBranch, Image, LayoutGrid, Star,
-  Settings, HelpCircle, Tag, X, Trash2, GitMerge, FolderOpen,
-  Video, Music, MessageSquare, CheckCircle, Sparkles,
-  MoreHorizontal
+  ChevronRight, ChevronDown, Plus, SquareDashedMousePointer, Play,
+  MessageCircle, Image, Tag, X, Trash2, FolderOpen,
+  Video, Music, MessageSquare, CheckCircle, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/button';
 import { Badge } from '@/components/badge';
 import { cn } from '@/lib/utils';
 
-interface BranchInfo {
-  name: string;
-  commits: number;
-  lastActivity: string;
-  isActive: boolean;
-}
 
 interface AssetFolder {
   name: string;
@@ -45,7 +37,6 @@ export function LeftSidebar() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     assets: true,
     collections: true,
-    branches: true,
     tags: true,
     recent: true
   });
@@ -57,11 +48,6 @@ export function LeftSidebar() {
     }));
   };
 
-  const branches: BranchInfo[] = [
-    { name: 'main', commits: 247, lastActivity: '2 hours ago', isActive: true },
-    { name: 'feature/rebrand', commits: 12, lastActivity: '1 day ago', isActive: false },
-    { name: 'hotfix/logo-fix', commits: 3, lastActivity: '3 days ago', isActive: false }
-  ];
 
   const assetFolders: AssetFolder[] = [
     { name: 'All Assets', count: 1247 },
@@ -221,64 +207,6 @@ export function LeftSidebar() {
           )}
         </div>
 
-        {/* Branches Section */}
-        <div className="mb-6">
-          <button
-            onClick={() => toggleSection('branches')}
-            className="flex items-center justify-between w-full text-xs font-medium text-foreground hover:text-muted-foreground mb-3"
-          >
-            <span>Branches</span>
-            {expandedSections.branches ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
-          </button>
-
-          {expandedSections.branches && (
-            <div className="space-y-1">
-              {branches.map((branch, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "flex items-center justify-between py-2 px-2 rounded cursor-pointer group",
-                    branch.isActive ? 'bg-accent' : 'hover:bg-accent'
-                  )}
-                >
-                  <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <GitBranch className={cn(
-                      "w-4 h-4 flex-shrink-0",
-                      branch.isActive ? 'text-primary' : 'text-muted-foreground'
-                    )} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2">
-                        <span className={cn(
-                          "text-xs truncate",
-                          branch.isActive ? 'text-foreground' : 'text-foreground'
-                        )}>
-                          {branch.name}
-                        </span>
-                        {branch.isActive && (
-                          <Badge variant="secondary" className="text-xs bg-primary/20 text-primary">
-                            active
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {branch.commits} commits • {branch.lastActivity}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <button className="flex items-center space-x-2 py-2 px-2 w-full text-left rounded hover:bg-accent group">
-                <GitMerge className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground group-hover:text-foreground">New Branch</span>
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Tags Section */}
         <div className="mb-6">

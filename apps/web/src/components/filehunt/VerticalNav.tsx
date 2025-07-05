@@ -5,16 +5,17 @@ import {
   Search,
   Upload,
   FolderOpen,
-  GitBranch,
+  GitPullRequest,
+  Tag,
+  Activity,
   Star,
   Settings,
-  HelpCircle,
-  Activity
+  HelpCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/button';
 
-export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'branches' | 'favorites' | 'settings' | 'help' | 'activities' | 'asset-detail';
+export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'approvals' | 'releases' | 'activity' | 'favorites' | 'settings' | 'help' | 'asset-detail';
 
 interface VerticalNavProps {
   currentView: AppView;
@@ -27,8 +28,9 @@ export function VerticalNav({ currentView, onViewChange }: VerticalNavProps) {
     { id: 'search' as AppView, icon: Search, label: 'Search' },
     { id: 'upload' as AppView, icon: Upload, label: 'Upload' },
     { id: 'collections' as AppView, icon: FolderOpen, label: 'Collections' },
-    { id: 'branches' as AppView, icon: GitBranch, label: 'Branches' },
-    { id: 'activities' as AppView, icon: Activity, label: 'Activities' },
+    { id: 'approvals' as AppView, icon: GitPullRequest, label: 'Approvals' },
+    { id: 'releases' as AppView, icon: Tag, label: 'Releases' },
+    { id: 'activity' as AppView, icon: Activity, label: 'Activity' },
     { id: 'favorites' as AppView, icon: Star, label: 'Favorites' },
   ];
 

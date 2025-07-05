@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { 
   ChevronRight, 
   ChevronDown, 
+  ChevronUp,
   Plus, 
   Grid3X3, 
   List, 
@@ -13,7 +14,11 @@ import {
   FolderOpen,
   FolderPlus,
   Users,
-  GitBranch
+  GitBranch,
+  Bell,
+  Check,
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/button';
 import { Input } from '@/components/input';
@@ -26,16 +31,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/dropdown-menu';
 import { ThemeSelector } from '@/components/theme-selector';
-import { AppearancePopover } from './AppearancePopover';
 import { AppView } from './VerticalNav';
+import { Branch } from '@/data/branches';
 
 export type ViewMode = 'grid' | 'list' | 'gallery';
 
-interface AppearanceSettings {
-  cardSize: 'S' | 'M' | 'L';
-  aspectRatio: 'masonry' | '16:9' | '4:3' | '1:1';
-  thumbnailScale: 'fit' | 'fill';
-  showCardInfo: boolean;
+interface Notification {
+  id: string;
+  type: 'approval' | 'activity' | 'system' | 'collaboration';
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  actionUrl?: string;
+  avatar?: string;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 interface HeaderProps {
@@ -47,8 +57,14 @@ interface HeaderProps {
   currentView?: AppView;
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
-  appearanceSettings?: AppearanceSettings;
-  onAppearanceSettingsChange?: (settings: AppearanceSettings) => void;
+  // Branch management
+  currentBranch?: Branch;
+  availableBranches?: Branch[];
+  onBranchChange?: (branchId: string) => void;
+  // Notifications
+  notifications?: Notification[];
+  onNotificationClick?: (notificationId: string) => void;
+  onMarkAllNotificationsRead?: () => void;
 }
 
 export function Header({
@@ -60,10 +76,15 @@ export function Header({
   currentView = 'main',
   viewMode = 'grid',
   onViewModeChange,
-  appearanceSettings,
-  onAppearanceSettingsChange
+  currentBranch,
+  availableBranches = [],
+  onBranchChange,
+  notifications = [],
+  onNotificationClick,
+  onMarkAllNotificationsRead
 }: HeaderProps) {
   const [searchValue, setSearchValue] = useState('');
+  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
 
   const handleAction = (action: string) => {
     switch (action) {
@@ -114,8 +135,6 @@ export function Header({
       case 'new-branch':
         if (onCreateBranch) {
           onCreateBranch();
-        } else {
-          onViewChange?.('branches');
         }
         break;
     }
@@ -157,14 +176,12 @@ export function Header({
       });
     }
 
-    if (currentView !== 'branches') {
-      createActions.push({
-        key: 'new-branch',
-        label: 'New Branch',
-        icon: GitBranch,
-        description: 'Create a new branch'
-      });
-    }
+    createActions.push({
+      key: 'new-branch',
+      label: 'New Branch',
+      icon: GitBranch,
+      description: 'Create a new branch'
+    });
 
     return { uploadActions, createActions };
   };
@@ -187,7 +204,7 @@ export function Header({
 
   return (
     <div className="h-[60px] flex items-center justify-between px-4" style={{ backgroundColor: 'transparent' }}>
-      {/* Left side - Logo and Breadcrumb */}
+      {/* Left side - Logo, Branch Switcher and Breadcrumb */}
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-3">
           <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded flex items-center justify-center">
@@ -195,6 +212,66 @@ export function Header({
           </div>
           <h1 className="text-lg font-bold text-foreground">Filehunt</h1>
         </div>
+
+        {/* Branch Switcher - VS Code/Obsidian style - Always visible */}
+        <DropdownMenu onOpenChange={setIsBranchDropdownOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-3 text-sm font-medium hover:bg-accent border border-border/50 hover:border-border transition-all"
+            >
+              <GitBranch className="w-4 h-4 mr-2" />
+              <span>{currentBranch?.name || 'main'}</span>
+              {isBranchDropdownOpen ? (
+                <ChevronUp className="w-3 h-3 ml-2" />
+              ) : (
+                <ChevronDown className="w-3 h-3 ml-2" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-72" align="start">
+            <DropdownMenuLabel className="flex items-center space-x-2">
+              <GitBranch className="w-4 h-4" />
+              <span>Switch branch</span>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="max-h-64 overflow-y-auto">
+              {availableBranches.length > 0 ? availableBranches.map((branch) => (
+                <DropdownMenuItem
+                  key={branch.id}
+                  onClick={() => onBranchChange?.(branch.id)}
+                  className="flex items-center justify-between px-3 py-2 cursor-pointer"
+                >
+                  <div className="flex items-center space-x-3">
+                    <GitBranch className={`w-4 h-4 flex-shrink-0 ${
+                      branch.id === currentBranch?.id ? 'text-primary' : 'text-muted-foreground'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <div className={`font-medium truncate ${
+                        branch.id === currentBranch?.id ? 'text-primary' : 'text-foreground'
+                      }`}>
+                        {branch.name}
+                      </div>
+                      {branch.description && (
+                        <div className="text-xs text-muted-foreground truncate">
+                          {branch.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {branch.id === currentBranch?.id && (
+                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                  )}
+                </DropdownMenuItem>
+              )) : (
+                <DropdownMenuItem disabled className="text-center text-muted-foreground">
+                  No branches available
+                </DropdownMenuItem>
+              )}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="flex items-center space-x-2 text-sm">
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -209,41 +286,31 @@ export function Header({
       <div className="flex items-center space-x-4">
         {/* View controls */}
         {shouldShowViewControls() && onViewModeChange && (
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2 bg-accent/30 rounded-md p-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleViewModeClick('grid')}
-                className={`h-7 w-7 p-0 ${getViewModeButtonClass('grid')}`}
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleViewModeClick('list')}
-                className={`h-7 w-7 p-0 ${getViewModeButtonClass('list')}`}
-              >
-                <List className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleViewModeClick('gallery')}
-                className={`h-7 w-7 p-0 ${getViewModeButtonClass('gallery')}`}
-              >
-                <GalleryVerticalEnd className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            {/* Appearance Settings */}
-            {appearanceSettings && onAppearanceSettingsChange && (
-              <AppearancePopover
-                settings={appearanceSettings}
-                onSettingsChange={onAppearanceSettingsChange}
-              />
-            )}
+          <div className="flex items-center space-x-2 bg-accent/30 rounded-md p-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleViewModeClick('grid')}
+              className={`h-7 w-7 p-0 ${getViewModeButtonClass('grid')}`}
+            >
+              <Grid3X3 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleViewModeClick('list')}
+              className={`h-7 w-7 p-0 ${getViewModeButtonClass('list')}`}
+            >
+              <List className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleViewModeClick('gallery')}
+              className={`h-7 w-7 p-0 ${getViewModeButtonClass('gallery')}`}
+            >
+              <GalleryVerticalEnd className="w-4 h-4" />
+            </Button>
           </div>
         )}
 
@@ -311,6 +378,82 @@ export function Header({
             className="pl-10 w-48 h-8"
           />
         </div>
+
+        {/* Notifications */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="relative">
+              <Bell className="w-4 h-4" />
+              {notifications.filter(n => !n.isRead).length > 0 && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs text-white font-medium">
+                    {notifications.filter(n => !n.isRead).length}
+                  </span>
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-80" align="end">
+            <div className="flex items-center justify-between p-3">
+              <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
+              {notifications.filter(n => !n.isRead).length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onMarkAllNotificationsRead}
+                  className="h-6 px-2 text-xs"
+                >
+                  Mark all read
+                </Button>
+              )}
+            </div>
+            <DropdownMenuSeparator />
+            <div className="max-h-80 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  No notifications
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    onClick={() => onNotificationClick?.(notification.id)}
+                    className={`flex items-start space-x-3 p-3 cursor-pointer ${
+                      !notification.isRead ? 'bg-accent/20' : ''
+                    }`}
+                  >
+                    <div className="flex-shrink-0 mt-0.5">
+                      {notification.type === 'approval' && (
+                        <Check className="w-4 h-4 text-green-500" />
+                      )}
+                      {notification.type === 'activity' && (
+                        <Clock className="w-4 h-4 text-blue-500" />
+                      )}
+                      {notification.type === 'system' && (
+                        <AlertCircle className="w-4 h-4 text-orange-500" />
+                      )}
+                      {notification.type === 'collaboration' && (
+                        <Users className="w-4 h-4 text-purple-500" />
+                      )}
+                    </div>
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium text-sm">{notification.title}</div>
+                        {!notification.isRead && (
+                          <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{notification.message}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(notification.timestamp).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Theme Selector */}
         <ThemeSelector />

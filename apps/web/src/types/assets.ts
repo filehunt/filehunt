@@ -8,6 +8,59 @@ interface TimelineCommit {
   branch?: string;
 }
 
+export interface Branch {
+  id: string;
+  name: string;
+  description?: string;
+  status: 'active' | 'merged' | 'abandoned';
+  baseBranch?: string;
+  author: {
+    name: string;
+    avatar: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  commitCount: number;
+  assetsCount: number;
+  collaborators: User[];
+  isPrimary?: boolean;
+  isProtected?: boolean;
+  lastCommit?: {
+    id: string;
+    message: string;
+    author: string;
+    timestamp: string;
+  };
+  mergeStatus?: 'can-merge' | 'conflicts' | 'behind' | 'up-to-date';
+}
+
+export interface Activity {
+  id: string;
+  type: 'asset_uploaded' | 'asset_updated' | 'asset_deleted' | 'branch_created' | 'branch_merged' | 'collection_created' | 'user_joined' | 'comment_added' | 'status_changed' | 'tag_added' | 'folder_created';
+  title: string;
+  description: string;
+  user: {
+    name: string;
+    avatar: string;
+  };
+  timestamp: string;
+  assetId?: string;
+  branchId?: string;
+  collectionId?: string;
+  metadata?: {
+    assetName?: string;
+    assetType?: string;
+    branchName?: string;
+    collectionName?: string;
+    oldStatus?: string;
+    newStatus?: string;
+    tagName?: string;
+    folderName?: string;
+    commentText?: string;
+  };
+  isRead?: boolean;
+}
+
 export interface SearchFilters {
   query?: string;
   type?: string[];
@@ -613,6 +666,352 @@ export const mockFolders: Folder[] = [
         isExpanded: false
       }
     ]
+  }
+];
+
+// Mock Branches Data
+export const mockBranches: Branch[] = [
+  {
+    id: '1',
+    name: 'main',
+    description: 'Main production branch',
+    status: 'active',
+    author: {
+      name: 'System',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
+    },
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-15T10:30:00Z',
+    commitCount: 156,
+    assetsCount: 234,
+    collaborators: [
+      {
+        id: '1',
+        name: 'John Smith',
+        email: 'john@company.com',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
+      },
+      {
+        id: '2',
+        name: 'Sarah Johnson',
+        email: 'sarah@company.com',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=32&h=32&fit=crop&crop=face'
+      }
+    ],
+    isPrimary: true,
+    isProtected: true,
+    lastCommit: {
+      id: 'abc123',
+      message: 'Update brand guidelines and product photos',
+      author: 'John Smith',
+      timestamp: '2h ago'
+    },
+    mergeStatus: 'up-to-date'
+  },
+  {
+    id: '2',
+    name: 'feature/new-product-line',
+    description: 'Assets for the upcoming product line launch',
+    status: 'active',
+    baseBranch: 'main',
+    author: {
+      name: 'Design Team',
+      avatar: 'https://images.unsplash.com/photo-1533601017-dc61895e03c0?w=32&h=32&fit=crop&crop=face'
+    },
+    createdAt: '2024-01-10T09:15:00Z',
+    updatedAt: '2024-01-15T14:20:00Z',
+    commitCount: 23,
+    assetsCount: 67,
+    collaborators: [
+      {
+        id: '3',
+        name: 'Design Team',
+        email: 'design@company.com',
+        avatar: 'https://images.unsplash.com/photo-1533601017-dc61895e03c0?w=32&h=32&fit=crop&crop=face'
+      },
+      {
+        id: '4',
+        name: 'Product Team',
+        email: 'product@company.com',
+        avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=32&h=32&fit=crop&crop=face'
+      }
+    ],
+    isPrimary: false,
+    isProtected: false,
+    lastCommit: {
+      id: 'def456',
+      message: 'Add new product photography and update color palette',
+      author: 'Design Team',
+      timestamp: '4h ago'
+    },
+    mergeStatus: 'can-merge'
+  },
+  {
+    id: '3',
+    name: 'hotfix/urgent-brand-update',
+    description: 'Critical brand asset updates',
+    status: 'active',
+    baseBranch: 'main',
+    author: {
+      name: 'Marketing Team',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face'
+    },
+    createdAt: '2024-01-14T16:30:00Z',
+    updatedAt: '2024-01-15T09:45:00Z',
+    commitCount: 5,
+    assetsCount: 12,
+    collaborators: [
+      {
+        id: '5',
+        name: 'Marketing Team',
+        email: 'marketing@company.com',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face'
+      }
+    ],
+    isPrimary: false,
+    isProtected: false,
+    lastCommit: {
+      id: 'ghi789',
+      message: 'Fix logo inconsistencies across assets',
+      author: 'Marketing Team',
+      timestamp: '1d ago'
+    },
+    mergeStatus: 'conflicts'
+  },
+  {
+    id: '4',
+    name: 'develop/video-content',
+    description: 'Video content development and editing',
+    status: 'active',
+    baseBranch: 'main',
+    author: {
+      name: 'Content Team',
+      avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=32&h=32&fit=crop&crop=face'
+    },
+    createdAt: '2024-01-08T11:20:00Z',
+    updatedAt: '2024-01-14T17:30:00Z',
+    commitCount: 34,
+    assetsCount: 89,
+    collaborators: [
+      {
+        id: '6',
+        name: 'Content Team',
+        email: 'content@company.com',
+        avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=32&h=32&fit=crop&crop=face'
+      },
+      {
+        id: '7',
+        name: 'Video Editor',
+        email: 'video@company.com',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face'
+      }
+    ],
+    isPrimary: false,
+    isProtected: false,
+    lastCommit: {
+      id: 'jkl012',
+      message: 'Add tutorial videos and promotional content',
+      author: 'Content Team',
+      timestamp: '3d ago'
+    },
+    mergeStatus: 'behind'
+  },
+  {
+    id: '5',
+    name: 'archive/old-campaign',
+    description: 'Previous marketing campaign assets - archived',
+    status: 'merged',
+    baseBranch: 'main',
+    author: {
+      name: 'Marketing Team',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face'
+    },
+    createdAt: '2023-12-01T10:00:00Z',
+    updatedAt: '2024-01-05T15:30:00Z',
+    commitCount: 78,
+    assetsCount: 145,
+    collaborators: [
+      {
+        id: '8',
+        name: 'Marketing Team',
+        email: 'marketing@company.com',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face'
+      }
+    ],
+    isPrimary: false,
+    isProtected: false,
+    lastCommit: {
+      id: 'mno345',
+      message: 'Final campaign assets before archiving',
+      author: 'Marketing Team',
+      timestamp: '10d ago'
+    },
+    mergeStatus: 'up-to-date'
+  }
+];
+
+// Mock Activities Data
+export const mockActivities: Activity[] = [
+  {
+    id: '1',
+    type: 'asset_uploaded',
+    title: 'New product images uploaded',
+    description: 'Added 12 high-resolution product photos to the main collection',
+    user: {
+      name: 'Photography Team',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-15T10:30:00Z',
+    assetId: '1',
+    metadata: {
+      assetName: 'product-hero-shot.jpg',
+      assetType: 'image'
+    },
+    isRead: false
+  },
+  {
+    id: '2',
+    type: 'branch_created',
+    title: 'New branch created',
+    description: 'Created feature branch for new product line development',
+    user: {
+      name: 'Design Team',
+      avatar: 'https://images.unsplash.com/photo-1533601017-dc61895e03c0?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-15T09:15:00Z',
+    branchId: '2',
+    metadata: {
+      branchName: 'feature/new-product-line'
+    },
+    isRead: false
+  },
+  {
+    id: '3',
+    type: 'status_changed',
+    title: 'Asset status updated',
+    description: 'Video content moved from review to approved status',
+    user: {
+      name: 'Content Manager',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-15T08:45:00Z',
+    assetId: '2',
+    metadata: {
+      assetName: 'team-meeting-video.mp4',
+      assetType: 'video',
+      oldStatus: 'review',
+      newStatus: 'approved'
+    },
+    isRead: true
+  },
+  {
+    id: '4',
+    type: 'collection_created',
+    title: 'New collection created',
+    description: 'Created "Q1 Marketing Campaign" collection with smart rules',
+    user: {
+      name: 'Marketing Team',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-14T16:20:00Z',
+    collectionId: '4',
+    metadata: {
+      collectionName: 'Q1 Marketing Campaign'
+    },
+    isRead: true
+  },
+  {
+    id: '5',
+    type: 'comment_added',
+    title: 'New comment added',
+    description: 'Added feedback on brand guidelines document',
+    user: {
+      name: 'Brand Manager',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-14T14:30:00Z',
+    assetId: '3',
+    metadata: {
+      assetName: 'brand-guidelines.pdf',
+      assetType: 'document',
+      commentText: 'Please update the color specifications for better print quality'
+    },
+    isRead: true
+  },
+  {
+    id: '6',
+    type: 'user_joined',
+    title: 'New team member joined',
+    description: 'Alex Chen joined the design team workspace',
+    user: {
+      name: 'Alex Chen',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-14T11:15:00Z',
+    isRead: true
+  },
+  {
+    id: '7',
+    type: 'branch_merged',
+    title: 'Branch merged successfully',
+    description: 'Merged hotfix/urgent-brand-update into main branch',
+    user: {
+      name: 'Lead Developer',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-13T17:45:00Z',
+    branchId: '3',
+    metadata: {
+      branchName: 'hotfix/urgent-brand-update'
+    },
+    isRead: true
+  },
+  {
+    id: '8',
+    type: 'tag_added',
+    title: 'Tags added to assets',
+    description: 'Added "social-media" and "instagram" tags to 15 images',
+    user: {
+      name: 'Social Media Manager',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-13T15:20:00Z',
+    metadata: {
+      tagName: 'social-media'
+    },
+    isRead: true
+  },
+  {
+    id: '9',
+    type: 'folder_created',
+    title: 'New folder structure',
+    description: 'Created "2024 Campaigns" folder with subfolders for Q1-Q4',
+    user: {
+      name: 'Project Manager',
+      avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-12T13:30:00Z',
+    metadata: {
+      folderName: '2024 Campaigns'
+    },
+    isRead: true
+  },
+  {
+    id: '10',
+    type: 'asset_updated',
+    title: 'Asset metadata updated',
+    description: 'Updated camera settings and location data for landscape photos',
+    user: {
+      name: 'Metadata Specialist',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=32&h=32&fit=crop&crop=face'
+    },
+    timestamp: '2024-01-12T10:45:00Z',
+    assetId: '13',
+    metadata: {
+      assetName: 'landscape-drone.jpg',
+      assetType: 'image'
+    },
+    isRead: true
   }
 ];
 

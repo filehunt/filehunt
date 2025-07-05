@@ -18,6 +18,11 @@ import { SearchRightSidebar } from './SearchRightSidebar';
 import { UploadScreen } from './UploadScreen';
 import { CollectionsScreen } from '@/components/collections/CollectionsScreen';
 import { CollectionStatusBar } from '@/components/collections/CollectionStatusBar';
+import { BranchesScreen } from '@/components/branches/BranchesScreen';
+import { ApprovalsScreen } from '@/components/approvals/ApprovalsScreen';
+import { ReleasesScreen } from '@/components/releases/ReleasesScreen';
+import { ActivitiesScreen } from '@/components/activities/ActivitiesScreen';
+import { mockBranches } from '@/data/branches';
 
 export default function FilehuntApp() {
   // Core app state
@@ -44,6 +49,9 @@ export default function FilehuntApp() {
     thumbnailScale: 'fill' as 'fit' | 'fill',
     showCardInfo: true
   });
+  
+  // Branch management state
+  const [currentBranch, setCurrentBranch] = useState(mockBranches[0]); // Start with main branch
 
   // Navigation handlers
   const handleViewChange = (view: AppView) => {
@@ -197,6 +205,35 @@ export default function FilehuntApp() {
     console.log('Create branch:', branchData);
     setCurrentView('branches');
   };
+  
+  // Branch management handler
+  const handleBranchChange = (branchId: string) => {
+    const branch = mockBranches.find(b => b.id === branchId);
+    if (branch) {
+      setCurrentBranch(branch);
+      console.log('Switched to branch:', branch.name);
+    }
+  };
+  
+  // Mock notifications for header
+  const mockNotifications = [
+    {
+      id: '1',
+      type: 'approval' as const,
+      title: 'Asset Approved',
+      message: 'Your winter campaign hero image has been approved.',
+      timestamp: '2024-01-15T09:30:00Z',
+      isRead: false,
+    },
+    {
+      id: '2',
+      type: 'collaboration' as const,
+      title: 'New Comment',
+      message: 'Mike Johnson commented on "Product photos batch 3"',
+      timestamp: '2024-01-15T08:45:00Z',
+      isRead: false,
+    }
+  ];
 
   // Footer action handlers (placeholder for now)
   const handleDownload = (assets: Asset[]) => {
@@ -269,7 +306,7 @@ export default function FilehuntApp() {
 
   // Determine which components to show based on current view
   const shouldShowHeader = () => {
-    return ['main', 'search', 'collections', 'branches', 'upload', 'asset-detail'].includes(currentView);
+    return ['main', 'search', 'upload', 'collections', 'branches', 'approvals', 'releases', 'activity', 'favorites', 'settings', 'help', 'asset-detail'].includes(currentView);
   };
 
   const shouldShowFooter = () => {
@@ -393,23 +430,24 @@ export default function FilehuntApp() {
 
       case 'branches':
         return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Branches View</h2>
-              <p className="text-muted-foreground">Git-like branching will be implemented in Iteration 5</p>
-            </div>
-          </div>
+          <BranchesScreen />
         );
 
-      case 'activities':
+      case 'approvals':
         return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Activities View</h2>
-              <p className="text-muted-foreground">Activity timeline will be implemented in Iteration 6</p>
-            </div>
-          </div>
+          <ApprovalsScreen />
         );
+
+      case 'releases':
+        return (
+          <ReleasesScreen />
+        );
+
+      case 'activity':
+        return (
+          <ActivitiesScreen />
+        );
+
 
       case 'favorites':
         return (
@@ -475,8 +513,12 @@ export default function FilehuntApp() {
             currentView={currentView}
             viewMode={shouldShowViewControls() ? viewMode : undefined}
             onViewModeChange={shouldShowViewControls() ? handleViewModeChange : undefined}
-            appearanceSettings={shouldShowAppearanceControls() && currentView !== 'collections' ? appearanceSettings : undefined}
-            onAppearanceSettingsChange={shouldShowAppearanceControls() && currentView !== 'collections' ? setAppearanceSettings : undefined}
+            currentBranch={currentBranch}
+            availableBranches={mockBranches}
+            onBranchChange={handleBranchChange}
+            notifications={mockNotifications}
+            onNotificationClick={(notificationId) => console.log('Notification clicked:', notificationId)}
+            onMarkAllNotificationsRead={() => console.log('All notifications marked as read')}
           />
         )}
 
