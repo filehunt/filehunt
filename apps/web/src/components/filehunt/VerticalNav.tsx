@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/button';
 
-export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'approvals' | 'releases' | 'activity' | 'favorites' | 'users' | 'settings' | 'help' | 'asset-detail';
+export type AppView = 'main' | 'upload' | 'search' | 'collections' | 'approvals' | 'releases' | 'activity' | 'users' | 'settings' | 'help' | 'asset-detail';
 
 interface VerticalNavProps {
   currentView: AppView;
@@ -32,7 +32,6 @@ export function VerticalNav({ currentView, onViewChange }: VerticalNavProps) {
     { id: 'approvals' as AppView, icon: GitPullRequest, label: 'Approvals' },
     { id: 'releases' as AppView, icon: Tag, label: 'Releases' },
     { id: 'activity' as AppView, icon: Activity, label: 'Activity' },
-    { id: 'favorites' as AppView, icon: Star, label: 'Favorites' },
   ];
 
   const bottomNavItems = [
@@ -62,10 +61,10 @@ export function VerticalNav({ currentView, onViewChange }: VerticalNavProps) {
         </Button>
 
         {/* Tooltip */}
-        <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[99999]">
+        {/* <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[99999]">
           {item.label}
           <div className="absolute left-[-4px] top-1/2 transform -translate-y-1/2 w-2 h-2 bg-popover rotate-45" />
-        </div>
+        </div> */}
       </div>
     );
   };

@@ -126,8 +126,8 @@ export function SettingsScreen() {
   };
 
   const toggleIntegration = (integrationId: string) => {
-    setIntegrations(prev => prev.map(integration => 
-      integration.id === integrationId 
+    setIntegrations(prev => prev.map(integration =>
+      integration.id === integrationId
         ? { ...integration, connected: !integration.connected }
         : integration
     ));
@@ -146,69 +146,88 @@ export function SettingsScreen() {
   ];
 
   return (
-    <div className="flex-1 flex">
-      {/* Settings Navigation */}
-      <div className="w-64 p-4">
-        <h2 className="text-lg font-semibold mb-6">Settings</h2>
-        <nav className="space-y-1">
-          {settingsSections.map((section) => {
+    <div className="flex-1 flex flex-col">
+      {/* Settings Navigation Tabs */}
+      <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-2">Settings</h1>
+          <p className="text-muted-foreground">Manage your account and workspace preferences</p>
+        </div>
+
+        <div className="flex items-center space-x-1 overflow-x-auto">
+          {settingsSections.map((section, index) => {
             const IconComponent = section.icon;
             return (
-              <button
+              <motion.button
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
                 className={cn(
-                  "w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors",
+                  "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm transition-colors whitespace-nowrap",
                   activeSection === section.id
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-muted/50'
                 )}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
               >
                 <IconComponent className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm">{section.name}</span>
-              </button>
+                <span>{section.name}</span>
+              </motion.button>
             );
           })}
-        </nav>
+        </div>
+
+        <div className="flex items-center space-x-2 mt-4">
+          {isDirty && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+            >
+              <Button onClick={handleSave}>
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </motion.div>
+          )}
+          {/* <Button variant="outline" size="sm">
+            <HelpCircle className="w-4 h-4 mr-2" />
+            Help
+          </Button> */}
+        </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">
-                {settingsSections.find(s => s.id === activeSection)?.name}
-              </h1>
-              <p className="text-muted-foreground">Manage your account and workspace preferences</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              {isDirty && (
-                <Button onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </Button>
-              )}
-              <Button variant="outline" size="sm">
-                <HelpCircle className="w-4 h-4 mr-2" />
-                Help
-              </Button>
-            </div>
-          </div>
+      <div className="flex-1 overflow-auto">
+        <motion.div
+          className="max-w-6xl mx-auto p-6"
+          key={activeSection}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
 
           {/* Content */}
-          <div className="flex-1 overflow-auto">
+          <div>
             {/* Account Section */}
             {activeSection === 'account' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="grid grid-cols-2 gap-6">
                   {/* Personal Information */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Personal Information</CardTitle>
-                      <CardDescription>Update your personal details and profile</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h3 className="font-medium text-lg">Personal Information</h3>
+                      <p className="text-muted-foreground text-sm">Update your personal details and profile</p>
+                    </div>
+                    <div className="space-y-4">
                       <div className="flex items-center space-x-4">
                         <Avatar className="w-20 h-20">
                           <AvatarImage src={currentUser.avatar} />
@@ -225,7 +244,7 @@ export function SettingsScreen() {
                           </Button>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="firstName">First Name</Label>
@@ -236,12 +255,12 @@ export function SettingsScreen() {
                           <Input id="lastName" defaultValue="Chen" onChange={() => setIsDirty(true)} />
                         </div>
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="email">Email</Label>
                         <Input id="email" type="email" defaultValue={currentUser.email} onChange={() => setIsDirty(true)} />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="department">Department</Label>
                         <Select defaultValue={currentUser.department} onValueChange={() => setIsDirty(true)}>
@@ -257,16 +276,16 @@ export function SettingsScreen() {
                           </SelectContent>
                         </Select>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
                   {/* Workspace Settings */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Workspace Preferences</CardTitle>
-                      <CardDescription>Customize your workspace experience</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h3 className="font-medium text-lg">Workspace Preferences</h3>
+                      <p className="text-muted-foreground text-sm">Customize your workspace experience</p>
+                    </div>
+                    <div className="space-y-4">
                       <div>
                         <Label htmlFor="timezone">Timezone</Label>
                         <Select defaultValue="UTC-8" onValueChange={() => setIsDirty(true)}>
@@ -281,7 +300,7 @@ export function SettingsScreen() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="language">Language</Label>
                         <Select defaultValue="en" onValueChange={() => setIsDirty(true)}>
@@ -296,7 +315,7 @@ export function SettingsScreen() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <div>
@@ -305,7 +324,7 @@ export function SettingsScreen() {
                           </div>
                           <Switch defaultChecked onCheckedChange={() => setIsDirty(true)} />
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Show file extensions</Label>
@@ -313,7 +332,7 @@ export function SettingsScreen() {
                           </div>
                           <Switch onCheckedChange={() => setIsDirty(true)} />
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Enable keyboard shortcuts</Label>
@@ -322,22 +341,27 @@ export function SettingsScreen() {
                           <Switch defaultChecked onCheckedChange={() => setIsDirty(true)} />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Notifications Section */}
             {activeSection === 'notifications' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="grid grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Email Notifications</CardTitle>
-                      <CardDescription>Choose what email notifications you receive</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h3 className="font-medium text-lg">Email Notifications</h3>
+                      <p className="text-muted-foreground text-sm">Choose what email notifications you receive</p>
+                    </div>
+                    <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Asset uploads</Label>
@@ -345,7 +369,7 @@ export function SettingsScreen() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Comments and reviews</Label>
@@ -353,7 +377,7 @@ export function SettingsScreen() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Mentions</Label>
@@ -361,7 +385,7 @@ export function SettingsScreen() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Weekly digest</Label>
@@ -369,15 +393,15 @@ export function SettingsScreen() {
                         </div>
                         <Switch />
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Push Notifications</CardTitle>
-                      <CardDescription>Manage real-time notifications</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h3 className="font-medium text-lg">Push Notifications</h3>
+                      <p className="text-muted-foreground text-sm">Manage real-time notifications</p>
+                    </div>
+                    <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Browser notifications</Label>
@@ -385,7 +409,7 @@ export function SettingsScreen() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Desktop notifications</Label>
@@ -393,7 +417,7 @@ export function SettingsScreen() {
                         </div>
                         <Switch />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Mobile notifications</Label>
@@ -401,7 +425,7 @@ export function SettingsScreen() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      
+
                       <div>
                         <Label>Quiet hours</Label>
                         <p className="text-sm text-muted-foreground mb-2">Don't send notifications during these hours</p>
@@ -411,22 +435,27 @@ export function SettingsScreen() {
                           <Input placeholder="08:00" className="w-20" />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Appearance Section */}
             {activeSection === 'appearance' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="grid grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Theme</CardTitle>
-                      <CardDescription>Customize the appearance of your workspace</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h3 className="font-medium text-lg">Theme</h3>
+                      <p className="text-muted-foreground text-sm">Customize the appearance of your workspace</p>
+                    </div>
+                    <div className="space-y-4">
                       <div>
                         <Label>Color theme</Label>
                         <div className="grid grid-cols-3 gap-4 mt-2">
@@ -444,7 +473,7 @@ export function SettingsScreen() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Dark mode</Label>
@@ -452,7 +481,7 @@ export function SettingsScreen() {
                         </div>
                         <Switch />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Reduced motion</Label>
@@ -460,15 +489,15 @@ export function SettingsScreen() {
                         </div>
                         <Switch />
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Layout</CardTitle>
-                      <CardDescription>Customize how content is displayed</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="mb-4">
+                      <h3 className="font-medium text-lg">Layout</h3>
+                      <p className="text-muted-foreground text-sm">Customize how content is displayed</p>
+                    </div>
+                    <div className="space-y-4">
                       <div>
                         <Label>Sidebar position</Label>
                         <Select defaultValue="left">
@@ -481,7 +510,7 @@ export function SettingsScreen() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div>
                         <Label>Default view</Label>
                         <Select defaultValue="grid">
@@ -495,7 +524,7 @@ export function SettingsScreen() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div>
                         <Label>Grid size</Label>
                         <Select defaultValue="medium">
@@ -509,15 +538,20 @@ export function SettingsScreen() {
                           </SelectContent>
                         </Select>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Security Section */}
-            {activeSection === 'security' && (
-              <div className="space-y-6">
+            {activeSection === 'privacy' && (
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="grid grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
@@ -529,21 +563,21 @@ export function SettingsScreen() {
                         <Label htmlFor="currentPassword">Current Password</Label>
                         <Input id="currentPassword" type="password" />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="newPassword">New Password</Label>
                         <Input id="newPassword" type="password" />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="confirmPassword">Confirm New Password</Label>
                         <Input id="confirmPassword" type="password" />
                       </div>
-                      
+
                       <Button>Update Password</Button>
-                      
+
                       <Separator />
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <Label>Two-factor authentication</Label>
@@ -565,7 +599,7 @@ export function SettingsScreen() {
                       <div>
                         <Label>API Key</Label>
                         <div className="flex items-center space-x-2 mt-1">
-                          <Input 
+                          <Input
                             type={showApiKey ? "text" : "password"}
                             value="fh_1234567890abcdef..."
                             readOnly
@@ -580,7 +614,7 @@ export function SettingsScreen() {
                           </Button>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2">
                         <Button variant="outline" size="sm">
                           <RefreshCw className="w-4 h-4 mr-2" />
@@ -591,7 +625,7 @@ export function SettingsScreen() {
                           API Docs
                         </Button>
                       </div>
-                      
+
                       <Alert>
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription>
@@ -601,12 +635,17 @@ export function SettingsScreen() {
                     </CardContent>
                   </Card>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Features Section */}
             {activeSection === 'features' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="grid grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
@@ -709,12 +748,17 @@ export function SettingsScreen() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
+              </motion.div>
             )}
 
             {/* Billing Section */}
             {activeSection === 'billing' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="grid grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
@@ -729,7 +773,7 @@ export function SettingsScreen() {
                         </div>
                         <Badge>Active</Badge>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Users</span>
@@ -744,7 +788,7 @@ export function SettingsScreen() {
                           <span>1,234 / 10,000</span>
                         </div>
                       </div>
-                      
+
                       <div className="flex space-x-2">
                         <Button variant="outline" size="sm">Upgrade</Button>
                         <Button variant="outline" size="sm">Change Plan</Button>
@@ -765,7 +809,7 @@ export function SettingsScreen() {
                           <p className="text-sm text-muted-foreground">Expires 12/26</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex space-x-2">
                         <Button variant="outline" size="sm">
                           <Edit className="w-4 h-4 mr-2" />
@@ -776,9 +820,9 @@ export function SettingsScreen() {
                           Add Card
                         </Button>
                       </div>
-                      
+
                       <Separator />
-                      
+
                       <div>
                         <h4 className="font-medium mb-2">Billing Address</h4>
                         <p className="text-sm text-muted-foreground">
@@ -790,12 +834,17 @@ export function SettingsScreen() {
                     </CardContent>
                   </Card>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Teams Section */}
             {activeSection === 'teams' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <Card>
                   <CardHeader>
                     <CardTitle>Team Management</CardTitle>
@@ -805,12 +854,17 @@ export function SettingsScreen() {
                     <p className="text-muted-foreground">Team management features coming soon.</p>
                   </CardContent>
                 </Card>
-              </div>
+              </motion.div>
             )}
 
             {/* Shortcuts Section */}
             {activeSection === 'shortcuts' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Keyboard Shortcuts</h3>
                   <Button variant="outline" size="sm">
@@ -875,12 +929,17 @@ export function SettingsScreen() {
                     </Card>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Privacy Section */}
             {activeSection === 'privacy' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <Card>
                   <CardHeader>
                     <CardTitle>Privacy Settings</CardTitle>
@@ -905,12 +964,17 @@ export function SettingsScreen() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
+              </motion.div>
             )}
 
             {/* About Section */}
             {activeSection === 'about' && (
-              <div className="space-y-6">
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
                 <div className="text-center">
                   <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl text-primary-foreground font-bold">F</span>
@@ -944,74 +1008,10 @@ export function SettingsScreen() {
                     </Button>
                   </CardContent>
                 </Card>
-              </div>
+              </motion.div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Right Sidebar - Settings Help */}
-      <div className="w-64 flex flex-col flex-shrink-0">
-        <div className="p-6">
-          <h3 className="font-semibold">Settings Help</h3>
-        </div>
-        
-        <div className="p-6 pb-4 flex-1 overflow-auto">
-          <div className="space-y-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  <Info className="w-5 h-5 text-blue-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-sm">Quick Tip</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Enable keyboard shortcuts to work faster with common actions.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  <Shield className="w-5 h-5 text-green-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-sm">Security</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Enable 2FA for enhanced account security.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-start space-x-3">
-                  <Palette className="w-5 h-5 text-purple-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-sm">Themes</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Choose a color theme that matches your workflow.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <HelpCircle className="w-4 h-4 mr-2" />
-                Documentation
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Contact Support
-              </Button>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

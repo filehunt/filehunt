@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VerticalNav, AppView } from './VerticalNav';
 import { Header, ViewMode } from './Header';
 import { Footer } from './Footer';
@@ -12,6 +12,7 @@ import { MouseSpotlight } from './MouseSpotlight';
 import { AssetDetail } from './AssetDetail';
 import { AssetDetailSidebar } from './AssetDetailSidebar';
 import { Asset, Collection, SearchFilters, SavedSearch, mockAssets } from '@/types/assets';
+import { Notification, mockNotifications } from '@/types/notifications';
 import { SearchScreen } from './SearchScreen';
 import { SearchLeftSidebar } from './SearchLeftSidebar';
 import { SearchRightSidebar } from './SearchRightSidebar';
@@ -24,6 +25,7 @@ import { ReleasesScreen } from '@/components/releases/ReleasesScreen';
 import { ActivitiesScreen } from '@/components/activities/ActivitiesScreen';
 import { SettingsScreen } from '@/components/settings/SettingsScreen';
 import { UsersScreen } from '@/components/users/UsersScreen';
+import { HelpScreen } from '@/components/help/HelpScreen';
 import { mockBranches } from '@/data/branches';
 
 export default function FilehuntApp() {
@@ -49,11 +51,20 @@ export default function FilehuntApp() {
     cardSize: 'M' as 'S' | 'M' | 'L',
     aspectRatio: 'masonry' as 'masonry' | '16:9' | '4:3' | '1:1',
     thumbnailScale: 'fill' as 'fit' | 'fill',
-    showCardInfo: true
+    showCardInfo: false
   });
   
   // Branch management state
   const [currentBranch, setCurrentBranch] = useState(mockBranches[0]); // Start with main branch
+  
+  
+  // Notifications state
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Initialize notifications with mock data
+  useEffect(() => {
+    setNotifications(mockNotifications);
+  }, []);
 
   // Navigation handlers
   const handleViewChange = (view: AppView) => {
@@ -187,6 +198,43 @@ export default function FilehuntApp() {
     setPreviewAsset(null);
   };
 
+
+  // Notification management
+  const handleNotificationClick = (notificationId: string) => {
+    // Mark notification as read when clicked
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif.id === notificationId 
+          ? { ...notif, isRead: true }
+          : notif
+      )
+    );
+    
+    // Navigate to relevant asset or view if needed
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification?.assetId) {
+      const asset = assets.find(a => a.id === notification.assetId);
+      if (asset) {
+        handleAssetDetail(asset);
+      }
+    }
+  };
+
+  const handleMarkAllNotificationsRead = () => {
+    setNotifications(prev => 
+      prev.map(notif => ({ ...notif, isRead: true }))
+    );
+  };
+
+  const addNotification = (notification: Omit<Notification, 'id' | 'createdAt'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: `notif-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+
   // File upload handler
   const handleUploadFiles = (files: FileList) => {
     console.log('Upload files:', Array.from(files).map(f => f.name));
@@ -217,25 +265,6 @@ export default function FilehuntApp() {
     }
   };
   
-  // Mock notifications for header
-  const mockNotifications = [
-    {
-      id: '1',
-      type: 'approval' as const,
-      title: 'Asset Approved',
-      message: 'Your winter campaign hero image has been approved.',
-      timestamp: '2024-01-15T09:30:00Z',
-      isRead: false,
-    },
-    {
-      id: '2',
-      type: 'collaboration' as const,
-      title: 'New Comment',
-      message: 'Mike Johnson commented on "Product photos batch 3"',
-      timestamp: '2024-01-15T08:45:00Z',
-      isRead: false,
-    }
-  ];
 
   // Footer action handlers (placeholder for now)
   const handleDownload = (assets: Asset[]) => {
@@ -308,7 +337,7 @@ export default function FilehuntApp() {
 
   // Determine which components to show based on current view
   const shouldShowHeader = () => {
-    return ['main', 'search', 'upload', 'collections', 'branches', 'approvals', 'releases', 'activity', 'favorites', 'users', 'settings', 'help', 'asset-detail'].includes(currentView);
+    return ['main', 'search', 'upload', 'collections', 'branches', 'approvals', 'releases', 'activity', 'users', 'settings', 'help', 'asset-detail'].includes(currentView);
   };
 
   const shouldShowFooter = () => {
@@ -334,6 +363,7 @@ export default function FilehuntApp() {
             onAssetDetail={handleAssetDetail}
             viewMode={viewMode}
             appearanceSettings={appearanceSettings}
+            onAppearanceSettingsChange={setAppearanceSettings}
           />
         );
 
@@ -451,15 +481,6 @@ export default function FilehuntApp() {
         );
 
 
-      case 'favorites':
-        return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Favorites View</h2>
-              <p className="text-muted-foreground">Your favorited assets will appear here</p>
-            </div>
-          </div>
-        );
 
       case 'settings':
         return (
@@ -473,12 +494,7 @@ export default function FilehuntApp() {
 
       case 'help':
         return (
-          <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: 'transparent' }}>
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Help & Support</h2>
-              <p className="text-muted-foreground">Documentation, tutorials, and support resources</p>
-            </div>
-          </div>
+          <HelpScreen />
         );
 
       default:
@@ -518,9 +534,9 @@ export default function FilehuntApp() {
             currentBranch={currentBranch}
             availableBranches={mockBranches}
             onBranchChange={handleBranchChange}
-            notifications={mockNotifications}
-            onNotificationClick={(notificationId) => console.log('Notification clicked:', notificationId)}
-            onMarkAllNotificationsRead={() => console.log('All notifications marked as read')}
+            notifications={notifications}
+            onNotificationClick={handleNotificationClick}
+            onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
           />
         )}
 

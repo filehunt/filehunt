@@ -215,7 +215,7 @@ export const mockAssets: Asset[] = [
     comments: 1,
     likes: 5,
     isLiked: true,
-    isFavorited: false,
+    isFavorited: true,
     lastModified: '2024-01-14T14:20:00Z',
     description: 'Team meeting discussing Q1 goals',
     timeline: [
@@ -278,7 +278,7 @@ export const mockAssets: Asset[] = [
     comments: 2,
     likes: 7,
     isLiked: false,
-    isFavorited: false,
+    isFavorited: true,
     lastModified: '2024-01-12T16:45:00Z',
     description: 'Ambient background music for video projects'
   },
@@ -397,7 +397,7 @@ export const mockAssets: Asset[] = [
     comments: 1,
     likes: 12,
     isLiked: true,
-    isFavorited: false,
+    isFavorited: true,
     lastModified: '2024-01-08T12:30:00Z',
     description: 'Forest nature soundscape recording'
   },
@@ -592,6 +592,60 @@ export const mockAssets: Asset[] = [
     isFavorited: false,
     lastModified: '2024-01-01T18:30:00Z',
     description: 'Urban street photography collection'
+  },
+  {
+    id: '16',
+    name: 'company-logo-final.svg',
+    type: 'image',
+    size: 45678,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=400&h=400&fit=crop',
+    originalUrl: '/images/company-logo-final.svg',
+    mimeType: 'image/svg+xml',
+    width: 512,
+    height: 512,
+    createdAt: '2024-01-16T14:00:00Z',
+    updatedAt: '2024-01-16T14:00:00Z',
+    uploadedBy: {
+      name: 'Brand Team',
+      avatar: 'https://images.unsplash.com/photo-1533601017-dc61895e03c0?w=32&h=32&fit=crop&crop=face'
+    },
+    tags: ['logo', 'brand', 'vector'],
+    folders: ['Brand', 'Logos'],
+    status: 'approved',
+    version: '3.0',
+    fileExtension: 'svg',
+    comments: 5,
+    likes: 28,
+    isLiked: true,
+    isFavorited: true,
+    lastModified: '2024-01-16T14:00:00Z',
+    description: 'Final version of the company logo in vector format'
+  },
+  {
+    id: '17',
+    name: 'marketing-presentation.pptx',
+    type: 'document',
+    size: 8912345,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=300&fit=crop',
+    originalUrl: '/documents/marketing-presentation.pptx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    createdAt: '2024-01-17T09:30:00Z',
+    updatedAt: '2024-01-17T09:30:00Z',
+    uploadedBy: {
+      name: 'Marketing Team',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=32&h=32&fit=crop&crop=face'
+    },
+    tags: ['presentation', 'marketing', 'strategy'],
+    folders: ['Documents', 'Presentations'],
+    status: 'approved',
+    version: '2.0',
+    fileExtension: 'pptx',
+    comments: 12,
+    likes: 19,
+    isLiked: false,
+    isFavorited: true,
+    lastModified: '2024-01-17T09:30:00Z',
+    description: 'Q1 marketing strategy presentation'
   }
 ];
 
@@ -1050,6 +1104,49 @@ export interface Collection {
   color?: string;
   icon?: string;
 }
+
+// Function to get collections with dynamic favorite count
+export const getCollectionsWithFavoriteCount = (assets: Asset[]): Collection[] => {
+  const favoriteAssets = assets.filter(asset => asset.isFavorited);
+  const favoriteCollectionSize = favoriteAssets.reduce((total, asset) => total + asset.size, 0);
+  
+  return [
+    {
+      id: '0',
+      name: 'Favoris',
+      description: 'Vos assets favoris pour un accès rapide',
+      thumbnailUrl: favoriteAssets.length > 0 
+        ? favoriteAssets[0].thumbnailUrl 
+        : 'https://images.unsplash.com/photo-1572205148653-b1b4cc2b8c83?w=400&h=300&fit=crop',
+      assetCount: favoriteAssets.length,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: new Date().toISOString(),
+      createdBy: {
+        id: 'system',
+        name: 'System',
+        email: 'system@filehunt.com',
+        avatar: 'https://images.unsplash.com/photo-1533601017-dc61895e03c0?w=32&h=32&fit=crop&crop=face'
+      },
+      tags: ['favoris', 'starred', 'bookmarked'],
+      type: 'smart',
+      smartRules: [
+        {
+          id: 'fav-1',
+          field: 'tags',
+          operator: 'contains',
+          value: 'isFavorited',
+          logic: 'OR'
+        }
+      ],
+      size: favoriteCollectionSize,
+      isPublic: false,
+      collaborators: [],
+      color: '#EF4444',
+      icon: 'heart'
+    },
+    ...mockCollections
+  ];
+};
 
 // Mock Collections Data
 export const mockCollections: Collection[] = [

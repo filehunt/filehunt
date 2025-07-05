@@ -33,6 +33,8 @@ interface MainContentProps {
   onAssetPreview: (asset: Asset) => void;
   onAssetDetail: (asset: Asset) => void;
   viewMode: ViewMode;
+  appearanceSettings?: AppearanceSettings;
+  onAppearanceSettingsChange?: (settings: AppearanceSettings) => void;
 }
 
 export function MainContent({
@@ -41,17 +43,29 @@ export function MainContent({
   onAssetPreview,
   onAssetDetail,
   viewMode,
+  appearanceSettings: externalAppearanceSettings,
+  onAppearanceSettingsChange,
 }: MainContentProps) {
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [appearanceSettings, setAppearanceSettings] = useState<AppearanceSettings>({
+  const [localAppearanceSettings, setLocalAppearanceSettings] = useState<AppearanceSettings>({
     cardSize: 'M',
     aspectRatio: 'masonry',
     thumbnailScale: 'fill',
     showCardInfo: false
   });
+  
+  const appearanceSettings = externalAppearanceSettings || localAppearanceSettings;
+  
+  const handleAppearanceChange = (settings: AppearanceSettings) => {
+    if (onAppearanceSettingsChange) {
+      onAppearanceSettingsChange(settings);
+    } else {
+      setLocalAppearanceSettings(settings);
+    }
+  };
 
   const sortAssets = (assets: Asset[], sortBy: SortOption, direction: SortDirection) => {
     return [...assets].sort((a, b) => {
@@ -111,7 +125,7 @@ export function MainContent({
             {/* Appearance */}
             <AppearancePopover
               settings={appearanceSettings}
-              onSettingsChange={setAppearanceSettings}
+              onSettingsChange={handleAppearanceChange}
             />
             
             {/* Sort */}
