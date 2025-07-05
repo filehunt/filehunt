@@ -415,7 +415,7 @@ export function SearchScreen({
                           <AssetCard
                             asset={asset}
                             isSelected={isSelected}
-                            onSelect={(assetId, selected) => onAssetSelect(asset, !isSelected)}
+                            onSelect={(assetId, selected) => onAssetSelect(asset.id, !isSelected)}
                             onPreview={undefined}
                             onDetail={() => onAssetDetail(asset)}
                             appearanceSettings={{

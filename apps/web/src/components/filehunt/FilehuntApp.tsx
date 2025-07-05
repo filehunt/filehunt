@@ -78,17 +78,15 @@ export default function FilehuntApp() {
   };
 
   // Asset selection handlers
-  const handleAssetSelect = (asset: Asset, isSelected: boolean) => {
+  const handleAssetSelect = (assetId: string, isSelected: boolean) => {
     if (isSelected) {
-      // Add asset to selection if not already selected
-      setSelectedAssets(prev => {
-        if (prev.some(a => a.id === asset.id)) {
-          return prev; // Already selected
-        }
-        return [...prev, asset];
-      });
+      // Find the asset and add it to selection
+      const asset = mockAssets.find(a => a.id === assetId);
+      if (asset) {
+        setSelectedAssets(prev => [...prev, asset]);
+      }
     } else {
-      setSelectedAssets(prev => prev.filter(a => a.id !== asset.id));
+      setSelectedAssets(prev => prev.filter(a => a.id !== assetId));
     }
   };
 

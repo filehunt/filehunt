@@ -80,7 +80,7 @@ export function AssetCard({
     <div
       className={cn(
         "relative rounded-lg bg-card/20 transition-all duration-200 cursor-pointer group mb-4 break-inside-avoid",
-        isSelected ? "bg-blue-500/20 ring-1 ring-blue-500/50" : "",
+        isSelected ? "bg-blue-500/30 ring-2 ring-blue-500/70 shadow-lg shadow-blue-500/20" : "",
         isHovered && !isSelected ? "bg-card/30 transform scale-[1.02]" : "",
         viewMode === 'list' ? 'flex items-center p-2' : 'flex flex-col',
         appearanceSettings.cardSize === 'S' ? 'text-xs' : 
@@ -200,14 +200,6 @@ export function AssetCard({
           </div>
         )}
         
-        {/* Selection indicator for search mode */}
-        {searchMode && isSelected && (
-          <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
-            <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-              Selected
-            </div>
-          </div>
-        )}
 
       </div>
 
